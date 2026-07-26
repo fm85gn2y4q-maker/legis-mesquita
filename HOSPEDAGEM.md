@@ -114,13 +114,26 @@ Terminado o primeiro deploy, em **Environment**:
 
 | Variável | Valor |
 |---|---|
-| `LEGIS_DOMINIOS` | `legislacao-mesquita.onrender.com` *(sem `https://`)* |
-| `LEGIS_URL_PUBLICA` | `https://legislacao-mesquita.onrender.com` |
-
-`LEGIS_SEGREDO_OAUTH` o Render gera sozinho.
+| `LEGIS_DOMINIOS` | `legis-mesquita-mcp.onrender.com` *(sem `https://`)* |
+| `LEGIS_URL_PUBLICA` | `https://legis-mesquita-mcp.onrender.com` |
+| `LEGIS_SEGREDO_OAUTH` | valor aleatório longo — use **Generate** no próprio Render |
 
 `LEGIS_URL_PUBLICA` liga o fluxo OAuth, que o **ChatGPT exige** para aceitar um
 conector. O Claude conecta sem ele. Salvar as variáveis dispara um novo deploy.
+
+**As três, não duas.** `LEGIS_SEGREDO_OAUTH` só é gerado automaticamente quando
+o serviço nasce de um Blueprint (`generateValue: true` no `render.yaml`).
+Criando o serviço à mão por **New → Web Service** — que é o caminho mais
+transparente e o que usamos —, ela não existe, e o servidor sorteia um segredo
+novo a cada partida. Como a instância gratuita hiberna, isso invalida todas as
+autorizações do ChatGPT a cada soneca: o conector pede autorização o dia
+inteiro, e parece defeito do acervo.
+
+O log diz quando falta:
+
+```
+LEGIS_SEGREDO_OAUTH não definido: usando um segredo temporário.
+```
 
 ### 3.4. Ligar nos clientes
 

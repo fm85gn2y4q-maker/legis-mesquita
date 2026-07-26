@@ -11,9 +11,13 @@ que guardasse autorizações em memória as perderia a cada soneca — o conecto
 pediria nova autorização o dia inteiro.
 
 Aviso que não cabe esconder: a aprovação é automática. Quem chegar à URL
-completa o fluxo e recebe um token. Isso protege contra chamada sem token,
-não contra quem conhece o endereço — é aceitável para jurisprudência do
-TCE-RJ, que já é pública, e **não** para acervo de obra protegida.
+completa o fluxo e recebe um token. Isso protege contra chamada sem token, não
+contra quem conhece o endereço — é aceitável para a legislação municipal de
+Mesquita, que a Prefeitura já publica, e **não** para acervo de obra protegida.
+
+O segredo de assinatura vem de `LEGIS_SEGREDO_OAUTH`. Sem ele, cada partida do
+processo sorteia um novo, e toda autorização concedida antes deixa de valer —
+o que na hospedagem gratuita significa reautorizar depois de cada hibernação.
 """
 
 from __future__ import annotations
@@ -241,7 +245,7 @@ class ProvedorOAuth(OAuthAuthorizationServerProvider):
         Token assinado vale enquanto não expirar: não há registro para apagar.
         Revogar de verdade exigiria uma lista de descartados — ou seja, estado,
         que é justamente o que este desenho evita. Para cortar todo o acesso,
-        troque `EMENTARIO_SEGREDO_OAUTH`: as assinaturas antigas param de valer.
+        troque `LEGIS_SEGREDO_OAUTH`: as assinaturas antigas param de valer.
         """
         log.info("Pedido de revogação recebido; tokens assinados expiram por conta própria.")
 
@@ -251,10 +255,15 @@ def montar(url_publica: str, segredo: str | None) -> tuple[ProvedorOAuth, AuthSe
     base = url_publica.rstrip("/")
     if not segredo:
         segredo = secrets.token_urlsafe(32)
+        # O nome da variável neste aviso importa: é por ele que quem opera o
+        # serviço vai procurar o que definir. Ficou `EMENTARIO_SEGREDO_OAUTH`
+        # por herança do projeto de onde este módulo veio — variável que este
+        # servidor nunca leu. Quem seguisse o aviso definiria a coisa errada e
+        # o alerta continuaria aparecendo, sem explicação.
         log.warning(
-            "EMENTARIO_SEGREDO_OAUTH não definido: usando um segredo temporário. "
+            "LEGIS_SEGREDO_OAUTH não definido: usando um segredo temporário. "
             "As autorizações concedidas agora deixam de valer quando o serviço "
-            "reiniciar."
+            "reiniciar — e no plano gratuito ele reinicia a cada hibernação."
         )
 
     definicoes = AuthSettings(
