@@ -37,12 +37,17 @@ def preparar(versao: str, usuario_repo: str = "SEU-USUARIO/legis-mesquita") -> i
     tamanho = destino.stat().st_size / 1048576
 
     print(f"\n{destino}  ({tamanho:.1f} MB)")
-    print("\n1. Crie a release no GitHub com a tag "
-          f"`acervo-v{versao}` e suba este arquivo como asset.")
-    print("2. Troque no Dockerfile:\n")
-    print(f"ARG ACERVO_URL=https://github.com/{usuario_repo}/releases/download/"
-          f"acervo-v{versao}/{destino.name}")
+    print(f"\n1. Mova para acervo/ e apague o .gz anterior:\n")
+    print(f"   mv {destino} acervo/")
+    print("\n2. Troque no Dockerfile:\n")
+    print(f"ARG ACERVO=acervo/{destino.name}")
     print(f"ARG ACERVO_SHA256={digest}")
+    print("\n3. git add -A && git commit && git push — o Render reconstrói.")
+    print("4. Recrie os conectores nos clientes.")
+    print("\nPreferindo publicar como asset de release (para não engordar o "
+          "histórico\ndo Git), o `instalar_acervo.py` também aceita URL:\n")
+    print(f"ARG ACERVO=https://github.com/{usuario_repo}/releases/download/"
+          f"acervo-v{versao}/{destino.name}")
     return 0
 
 

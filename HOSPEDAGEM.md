@@ -1,4 +1,4 @@
-# Hospedagem — tirar o servidor da sua máquina
+﻿# Hospedagem — tirar o servidor da sua máquina
 
 Três caminhos. O primeiro não exige conta em lugar nenhum; o terceiro deixa o
 acervo no ar com o computador desligado, que é o que faz o plugin funcionar no
@@ -48,14 +48,19 @@ winget install --id Cloudflare.cloudflared
 
 | | |
 |---|---|
-| Acervo comprimido | `dist/legislacao-mesquita-v1.0.0.db.gz` — **21,6 MB** (de 69,2) |
+| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.0.0` |
+| Acervo | `acervo/legislacao-mesquita-v1.0.0.db.gz` — **21,6 MB**, versionado no repositório |
 | sha256 | `96403c42352342e6c3e9adba7adba0b40e1f54b3536a4d39299280e5a63cded4` |
-| `Dockerfile` | URL e hash **já fixados** |
+| `Dockerfile` | descomprime o acervo do repositório, conferindo o hash |
 | `render.yaml` | pronto, sem `healthCheckPath` (veja o porquê no próprio arquivo) |
 
-O `Dockerfile` aponta para
-`github.com/fm85gn2y4q-maker/legis-mesquita`. **Se o repositório tiver outro
-nome, mude aquela linha antes de subir** — é a única que depende do nome.
+**Não há release a criar.** O acervo viaja no Git; o `Dockerfile` o descomprime
+e confere o sha256 antes de usar. A decisão anterior era outra — asset de
+release — e a troca está registrada no `METODO.md`.
+
+O passo do build foi verificado fora do Docker: reproduz 4.129 atos, 10.163
+páginas, 76 revogações integrais e 14 parciais, com `integrity_check` intacto —
+e para a construção quando o hash não bate.
 
 ### 3.1. Criar o repositório e subir o código
 
@@ -63,12 +68,11 @@ No GitHub, crie um repositório **vazio** chamado `legis-mesquita` — sem READM
 sem .gitignore, sem licença. O projeto já tem os seus, e um repositório que
 nasce com arquivos recusa o push por históricas divergentes.
 
-**Ele precisa ser público.** Não é preferência: `baixar_acervo.py` busca o
-asset da release com `urllib`, sem credencial. Num repositório privado o
-GitHub devolve 404 a esse download, e a construção da imagem falha dizendo
-apenas que não achou o arquivo — a visibilidade do repositório não aparece em
-lugar nenhum da mensagem. O código não tem segredo: chaves e senhas ficam nas
-variáveis de ambiente do Render, que não vão para o Git.
+Público ou privado, agora tanto faz — o Render acessa repositório privado pelo
+OAuth que você autoriza. Isto **era** uma exigência quando o acervo vinha de um
+asset de release: aquele download era anônimo, e num repositório privado o
+GitHub devolvia 404 sem dizer que a causa era a visibilidade. Vindo o acervo no
+próprio Git, a armadilha deixou de existir. O que foi criado aqui é público.
 
 Depois:
 
@@ -90,31 +94,17 @@ Gerenciador de Credenciais do Windows abre uma janela do GitHub na primeira vez
 e resolve. Criar o repositório e autorizar o acesso é você quem faz — conceder
 acesso a um terceiro vincula a sua identidade, e isso não se delega.
 
-O banco **não** vai nesse push: o `.gitignore` o mantém fora. São 23 arquivos,
-177 KB.
+O SQLite de 69 MB **não** vai nesse push: o `.gitignore` o mantém fora. Vão o
+código (23 arquivos, 177 KB) e o acervo comprimido, de 21,6 MB.
 
-### 3.2. Publicar o acervo como asset de release
-
-O banco é artefato de dados, não código-fonte. Vai à parte, com versão fixa.
-
-No GitHub, em **Releases → Draft a new release**:
-
-- Tag: `acervo-v1.0.0` *(atenção: é diferente da tag `v1.0.0` do código)*
-- Anexe o arquivo `dist/legislacao-mesquita-v1.0.0.db.gz`
-- Publique
-
-A imagem baixa esse arquivo na construção e **confere o sha256**. Divergindo do
-declarado no `Dockerfile`, o build falha em vez de subir um acervo diferente
-daquele que você validou.
-
-### 3.3. Aplicar o Blueprint
+### 3.2. Aplicar o Blueprint
 
 No Render: **Dashboard → Blueprints → New Blueprint**, apontando para o
 repositório. O `render.yaml` já declara o serviço.
 
 Criar a conta e autorizar o GitHub também é você.
 
-### 3.4. Declarar o endereço público — o passo que todo mundo esquece
+### 3.3. Declarar o endereço público — o passo que todo mundo esquece
 
 O endereço só existe depois do primeiro deploy. Até ele ser declarado, o
 servidor **recusa toda requisição externa com 421** — é proteção contra DNS
@@ -132,12 +122,12 @@ Terminado o primeiro deploy, em **Environment**:
 `LEGIS_URL_PUBLICA` liga o fluxo OAuth, que o **ChatGPT exige** para aceitar um
 conector. O Claude conecta sem ele. Salvar as variáveis dispara um novo deploy.
 
-### 3.5. Ligar nos clientes
+### 3.4. Ligar nos clientes
 
 - **ChatGPT** → Configurações → Conectores → adicionar `https://.../mcp`
 - **Claude** → Configurações → Conectores → adicionar a mesma URL
 
-### 3.6. O que esperar do plano gratuito
+### 3.5. O que esperar do plano gratuito
 
 O serviço **hiberna depois de um período sem uso**. A primeira chamada depois
 disso acorda a máquina e pode levar cerca de um minuto — tempo suficiente para
@@ -173,6 +163,15 @@ de testes se perdeu no projeto anterior.
 python preparar_release.py 1.1.0
 ```
 
-Imprime as duas linhas `ARG` para trocar no `Dockerfile`. Suba o novo `.db.gz`
-como release `acervo-v1.1.0`, faça o push, e o Render reconstrói. Depois,
-recrie os conectores.
+Gera `dist/legislacao-mesquita-v1.1.0.db.gz` e imprime o sha256. Então:
+
+1. mova o `.gz` para `acervo/` e **apague o anterior** — senão cada versão fica
+   somando 21,6 MB à imagem;
+2. troque as duas linhas `ARG` do `Dockerfile` pelo novo nome e hash;
+3. `git add -A && git commit && git push` — o Render reconstrói sozinho;
+4. **recrie os conectores** nos dois clientes.
+
+Apagar o `.gz` antigo tira peso da imagem, não do histórico: o Git guarda todas
+as versões para sempre. É o preço de trazer o acervo para dentro do
+repositório, e o `METODO.md` registra quando vale voltar ao asset de release —
+o `instalar_acervo.py` aceita URL, então essa volta é trocar uma linha.

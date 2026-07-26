@@ -10,26 +10,27 @@ RUN pip install --no-cache-dir -r requirements-servidor.txt
 
 COPY legis/ ./legis/
 
-# O acervo é artefato de dados, não código-fonte: vem de um asset de release,
-# com a versão fixada. Assim o deploy é reproduzível, o rollback é trocar a
-# versão, e o histórico do Git não carrega uma cópia binária a cada coleta.
+# O acervo viaja no repositório, comprimido, e é descomprimido aqui.
 #
-# A versão é declarada AQUI, como padrão do ARG, e não como argumento de
-# construção do serviço de hospedagem: nem todo serviço repassa argumentos de
-# build, e depender disso deixa a imagem sem acervo por um motivo invisível.
+# A decisão anterior era outra — asset de release, baixado na construção — e
+# está registrada no METODO.md junto com o motivo da troca. Em resumo: são
+# 21,6 MB numa base que se recoleta uma ou duas vezes por ano, e vindo pelo Git
+# desaparecem três modos de falha que a release trazia (repositório privado
+# devolvendo 404 no download, asset errado anexado, URL divergente do nome do
+# repositório) além da dependência de rede no build.
 #
-# A conferência do sha256 fecha a cadeia: divergindo o arquivo publicado, a
-# construção falha em vez de subir um acervo diferente do declarado.
-# Publicar acervo novo é trocar estas duas linhas.
-# Gerados por `python preparar_release.py 1.0.0` sobre o acervo de v1.0.0:
-# 4.129 atos, 69,2 MB → 21,6 MB comprimidos.
+# O que NÃO mudou é a cadeia de integridade: o sha256 continua declarado aqui e
+# conferido antes de descomprimir. Divergindo o arquivo, a construção falha em
+# vez de subir um acervo diferente daquele que foi testado. Publicar acervo
+# novo é trocar estas duas linhas e commitar o novo .gz.
 #
-# O usuário do GitHub veio do projeto anterior; se o repositório desta base
-# tiver outro nome, é esta linha — e só ela — que muda.
-ARG ACERVO_URL=https://github.com/fm85gn2y4q-maker/legis-mesquita/releases/download/acervo-v1.0.0/legislacao-mesquita-v1.0.0.db.gz
+# Gerado por `python preparar_release.py 1.0.0`: 4.129 atos, 69,2 → 21,6 MB.
+ARG ACERVO=acervo/legislacao-mesquita-v1.0.0.db.gz
 ARG ACERVO_SHA256=96403c42352342e6c3e9adba7adba0b40e1f54b3536a4d39299280e5a63cded4
-COPY baixar_acervo.py ./
-RUN python baixar_acervo.py "$ACERVO_URL" dados/mesquita.sqlite "$ACERVO_SHA256"
+COPY instalar_acervo.py ./
+COPY acervo/ ./acervo/
+RUN python instalar_acervo.py "$ACERVO" dados/mesquita.sqlite "$ACERVO_SHA256" \
+    && rm -rf acervo/
 
 # O serviço define a porta; 8080 é o padrão do Cloud Run quando ele não define.
 ENV PORT=8080 \

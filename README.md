@@ -116,17 +116,21 @@ Túnel temporário, para testar no ChatGPT sem hospedar nada:
 python -m legis.publicar
 ```
 
-Hospedagem permanente: o `Dockerfile` e o `render.yaml` estão prontos. O banco
-não vai no Git — vai como asset de release, e a imagem o baixa conferindo o
-sha256:
+Hospedagem permanente: o `Dockerfile` e o `render.yaml` estão prontos, e o
+acervo comprimido viaja no repositório (`acervo/`, 21,6 MB). A imagem o
+descomprime conferindo o sha256 declarado — divergindo, a construção falha em
+vez de subir acervo diferente do testado.
+
+Para gerar a versão comprimida de um acervo recém-coletado:
 
 ```bash
-python preparar_release.py 1.0.0
+python preparar_release.py 1.1.0
 ```
 
-O comando imprime as duas linhas `ARG` para trocar no `Dockerfile`. Depois do
+O comando imprime o sha256 para as duas linhas `ARG` do `Dockerfile`. Depois do
 primeiro deploy, defina `LEGIS_DOMINIOS` e `LEGIS_URL_PUBLICA` com o endereço
 que o serviço atribuiu — sem isso o servidor recusa toda requisição externa.
+O passo a passo completo está em [HOSPEDAGEM.md](HOSPEDAGEM.md).
 
 ### Testes
 

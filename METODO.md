@@ -313,7 +313,43 @@ resposta sai perfeita** — citação bem formatada, dispositivo existente, trec
 literal. Nenhuma métrica de busca as apanha, porque, do ponto de vista da
 busca, nada falhou.
 
-## 15. Consolidação temporal: adiada de propósito
+## 15. O acervo voltou para dentro do Git — e por quê
+
+O projeto anterior tirou o banco do Git com um princípio claro: *artefato de
+dados não é código-fonte*. Aqui a decisão foi invertida, e a inversão precisa
+ficar registrada com o motivo, senão vira desleixo aos olhos de quem ler depois.
+
+**O que mudou nos números.** Lá eram 81,3 MB comprimidos para 24,0, num acervo
+que se recoletava com frequência. Aqui são 69,2 MB para **21,6**, numa base
+municipal que se recoleta uma ou duas vezes por ano. O princípio pesava por
+*tamanho* e por *churn*; os dois encolheram.
+
+**O que a release custava.** Ela introduzia três modos de falha, e dois deles
+nos apareceram de fato:
+
+| Falha | Como se manifestava |
+|---|---|
+| Repositório privado | download anônimo do asset recebe 404, e o log não diz que a causa é a visibilidade |
+| Asset errado anexado | conferência de sha256 barra — mas só depois de um build inteiro |
+| Nome do repositório | a URL fica dentro do `Dockerfile` e tem de bater com o que se criou no GitHub |
+
+Somava-se a isso uma dependência de rede no meio da construção da imagem.
+
+**O que não mudou.** A cadeia de integridade continua inteira: `versão fixa →
+sha256 declarado → conferência antes de descomprimir → falha fechada`. Foi
+verificada fora do Docker, inclusive o caminho ruim — com hash errado, o passo
+sai com código diferente de zero e a construção para.
+
+**O custo, dito com clareza.** Cada versão do acervo deixa ~21,6 MB permanentes
+no histórico do Git. Apagar o `.gz` antigo alivia a imagem, não o histórico.
+Quando isso incomodar, a volta é uma linha: o `instalar_acervo.py` aceita
+caminho local **ou** URL, e o `preparar_release.py` imprime as duas formas.
+
+> Princípio herdado de outro projeto não se aplica por autoridade — se aplica
+> pelos números que o produziram. Quando os números mudam, a decisão se
+> reexamina; o que não se admite é inverter sem dizer.
+
+## 16. Consolidação temporal: adiada de propósito
 
 O salto seguinte desta base seria a **linha do tempo por dispositivo**. Hoje o
 acervo sabe:
