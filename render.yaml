@@ -1,0 +1,22 @@
+# Blueprint do Render. Aplicar por Dashboard → Blueprints → New Blueprint.
+#
+# Só declara o que foi verificado contra a documentação do serviço. Chaves
+# inventadas fazem o deploy falhar por motivo invisível de fora — foi o que
+# aconteceu no projeto anterior com `dockerBuildArgs`, que não existe.
+services:
+  - type: web
+    name: legislacao-mesquita
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /mcp
+    envVars:
+      # Preenchidos DEPOIS do primeiro deploy, quando o endereço público
+      # existir. Sem eles o servidor recusa toda requisição externa (421).
+      - key: LEGIS_DOMINIOS
+        sync: false
+      - key: LEGIS_URL_PUBLICA
+        sync: false
+      # Segredo do fluxo OAuth exigido pelo conector do ChatGPT.
+      - key: LEGIS_SEGREDO_OAUTH
+        generateValue: true

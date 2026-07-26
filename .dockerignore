@@ -1,0 +1,12 @@
+.venv/
+build/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+tests/
+dados/*.sqlite
+dados/*.sqlite-wal
+dados/*.sqlite-shm
+*.mcpb
+*.log

@@ -1,0 +1,14 @@
+.venv/
+build/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.log
+
+# O acervo é artefato de dados: passa de 50 MB e é gerado por programa.
+# Vai como asset de release, não no histórico do Git.
+dados/*.sqlite
+dados/*.sqlite-wal
+dados/*.sqlite-shm
+*.mcpb
