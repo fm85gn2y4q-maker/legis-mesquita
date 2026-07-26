@@ -59,8 +59,18 @@ nome, mude aquela linha antes de subir** — é a única que depende do nome.
 
 ### 3.1. Criar o repositório e subir o código
 
-No GitHub, crie um repositório **vazio** chamado `legis-mesquita` (sem README,
-sem .gitignore — o projeto já tem os seus). Depois:
+No GitHub, crie um repositório **vazio** chamado `legis-mesquita` — sem README,
+sem .gitignore, sem licença. O projeto já tem os seus, e um repositório que
+nasce com arquivos recusa o push por históricas divergentes.
+
+**Ele precisa ser público.** Não é preferência: `baixar_acervo.py` busca o
+asset da release com `urllib`, sem credencial. Num repositório privado o
+GitHub devolve 404 a esse download, e a construção da imagem falha dizendo
+apenas que não achou o arquivo — a visibilidade do repositório não aparece em
+lugar nenhum da mensagem. O código não tem segredo: chaves e senhas ficam nas
+variáveis de ambiente do Render, que não vão para o Git.
+
+Depois:
 
 ```bash
 git remote add origin https://github.com/fm85gn2y4q-maker/legis-mesquita.git
