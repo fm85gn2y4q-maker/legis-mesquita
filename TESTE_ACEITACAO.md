@@ -26,6 +26,18 @@ revogações **parciais** separado do de integrais — campo que só existe nest
 versão. Não vindo, remova e recrie o conector (ou reinstale a extensão) antes
 de rodar qualquer coisa.
 
+Os números da versão `v1.0.0`, conferidos pelo protocolo contra o pacote:
+
+| | |
+|---|---|
+| Atos | **4.129** |
+| Com texto integral | 4.011 |
+| Páginas indexadas | 10.163 |
+| Atos com revogação **integral** | **76** |
+| Atos com revogação **parcial** | **14** |
+
+Se isso não aparecer, o teste não começa.
+
 ---
 
 ## 1 · Norma revogada — *a busca devolve o morto com a mesma confiança*
