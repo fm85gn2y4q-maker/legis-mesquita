@@ -77,8 +77,13 @@ git remote add origin https://github.com/fm85gn2y4q-maker/legis-mesquita.git
 ```
 
 ```bash
-git push -u origin master && git push origin v1.0.0
+git branch -M main && git push -u origin main && git push origin v1.0.0
 ```
+
+O branch local nasceu `master` e o GitHub cria repositório novo com `main` como
+padrão. Renomear alinha os dois — sem isso, o repositório fica com um branch
+que não é o padrão declarado, e o Render, que constrói a partir do padrão,
+não encontraria nada.
 
 O `git push` vai pedir autenticação. Não tem `gh` instalado nesta máquina; o
 Gerenciador de Credenciais do Windows abre uma janela do GitHub na primeira vez
