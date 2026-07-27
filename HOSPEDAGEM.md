@@ -48,9 +48,9 @@ winget install --id Cloudflare.cloudflared
 
 | | |
 |---|---|
-| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.0.0` |
-| Acervo | `acervo/legislacao-mesquita-v1.0.0.db.gz` — **21,6 MB**, versionado no repositório |
-| sha256 | `96403c42352342e6c3e9adba7adba0b40e1f54b3536a4d39299280e5a63cded4` |
+| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.1.0` |
+| Acervo | `acervo/legislacao-mesquita-v1.1.0.db.gz` — **22,8 MB**, versionado no repositório |
+| sha256 | `b0f971645b8c844718a719de415509b2c8db84e9928e27e94e7e049135159758` |
 | `Dockerfile` | descomprime o acervo do repositório, conferindo o hash |
 | `render.yaml` | pronto, sem `healthCheckPath` (veja o porquê no próprio arquivo) |
 
@@ -58,8 +58,8 @@ winget install --id Cloudflare.cloudflared
 e confere o sha256 antes de usar. A decisão anterior era outra — asset de
 release — e a troca está registrada no `METODO.md`.
 
-O passo do build foi verificado fora do Docker: reproduz 4.129 atos, 10.163
-páginas, 76 revogações integrais e 14 parciais, com `integrity_check` intacto —
+O passo do build foi verificado fora do Docker: reproduz 4.128 atos, 10.488
+páginas, 83 revogações integrais e 15 parciais, com `integrity_check` intacto —
 e para a construção quando o hash não bate.
 
 ### 3.1. Criar o repositório e subir o código
@@ -81,7 +81,7 @@ git remote add origin https://github.com/fm85gn2y4q-maker/legis-mesquita.git
 ```
 
 ```bash
-git branch -M main && git push -u origin main && git push origin v1.0.0
+git branch -M main && git push -u origin main && git push --tags
 ```
 
 O branch local nasceu `master` e o GitHub cria repositório novo com `main` como
@@ -94,8 +94,8 @@ Gerenciador de Credenciais do Windows abre uma janela do GitHub na primeira vez
 e resolve. Criar o repositório e autorizar o acesso é você quem faz — conceder
 acesso a um terceiro vincula a sua identidade, e isso não se delega.
 
-O SQLite de 69 MB **não** vai nesse push: o `.gitignore` o mantém fora. Vão o
-código (23 arquivos, 177 KB) e o acervo comprimido, de 21,6 MB.
+O SQLite de 72 MB **não** vai nesse push: o `.gitignore` o mantém fora. Vão o
+código e o acervo comprimido, de 22,8 MB.
 
 ### 3.2. Aplicar o Blueprint
 
@@ -159,11 +159,11 @@ A resposta tem de bater com a versão publicada:
 
 | | |
 |---|---|
-| Atos | **4.129** |
-| Com texto integral | 4.011 |
-| Páginas indexadas | 10.163 |
-| Revogações **integrais** | **76** |
-| Revogações **parciais** | **14** |
+| Atos | **4.128** |
+| Com texto integral | 4.070 |
+| Páginas indexadas | 10.488 |
+| Revogações **integrais** | **83** |
+| Revogações **parciais** | **15** |
 
 Não batendo, o conector está com uma versão antiga em cache — **remova e recrie
 o conector**. Reiniciar o aplicativo não basta: a lista de ferramentas fica
@@ -173,13 +173,13 @@ de testes se perdeu no projeto anterior.
 ## Ao publicar um acervo novo, depois
 
 ```bash
-python preparar_release.py 1.1.0
+python preparar_release.py 1.2.0
 ```
 
-Gera `dist/legislacao-mesquita-v1.1.0.db.gz` e imprime o sha256. Então:
+Gera `dist/legislacao-mesquita-v1.2.0.db.gz` e imprime o sha256. Então:
 
 1. mova o `.gz` para `acervo/` e **apague o anterior** — senão cada versão fica
-   somando 21,6 MB à imagem;
+   somando ~23 MB à imagem;
 2. troque as duas linhas `ARG` do `Dockerfile` pelo novo nome e hash;
 3. `git add -A && git commit && git push` — o Render reconstrói sozinho;
 4. **recrie os conectores** nos dois clientes.

@@ -47,6 +47,25 @@ FORMAS = [
     ("DECRETO Nº 3.128, DE 03 DE JANEIRO DE 2022", "decreto", 3128, 2022),
     ("             LEI Nº 006, DE 05 DE MARÇO DE 2001.", "lei", 6, 2001),
     ("LEI COMPLEMENTAR Nº 35 DE 20 DE MAIO DE 2020", "lei_complementar", 35, 2020),
+    # Formas que só apareceram quando fui recuperar os atos sem texto.
+    ("Decreto nº. 060 de 25 de Janeiro de 2002.", "decreto", 60, 2002),
+    ("DECRETO Nº. 111, - DE 21 DE NOVEMBRO DE 2002.", "decreto", 111, 2002),
+    ("( * ) LEI Nº 110 DE 28 DE JUNHO DE 2002.", "lei", 110, 2002),
+    ("DECRETO N.º162 – DE - 18 DE SETEMBRO DE 2003", "decreto", 162, 2003),
+    ("DECRETO N. º 150 - DE 02 DE JUNHO DE 2003.", "decreto", 150, 2003),
+    ("LEI Nº 058 DE DEZEMBRO DE 2001.", "lei", 58, 2001),
+    ("LEI ORDINÁRIA Nº 1131 DE 18 DE JULHO DE 2019.", "lei", 1131, 2019),
+    ("LEI DE Nº 1111 DE 04 DE JANEIRO DE 2019", "lei", 1111, 2019),
+    ("Decreto nº, 215 de 13 de setembro de 2004.", "decreto", 215, 2004),
+    # A grafia do mês está errada na origem, nestes cinco. O ato existe.
+    ("DECRETO Nº455, DE 19 DE OUTRUBRO DE 2006", "decreto", 455, 2006),
+    ("*LEI Nº  638 DE 02 DE AGOSOTO DE 2010.", "lei", 638, 2010),
+    ("DECRETO 3.406, DE 28 DE FEVEIRO DE 2023", "decreto", 3406, 2023),
+    ("LEI Nº 293 DE 21 DEJUNHO DE 2006.", "lei", 293, 2006),
+    ("DECRETO Nº 103, DE 08 DE OUTUIBRO DE 2002.", "decreto", 103, 2002),
+    # Erro que nem a raiz de três letras sobrevive: SETEMBRO sem o "E". Aqui
+    # quem identifica o mês é a moldura `DE <dia> DE … DE <ano>`.
+    ("DECRETO Nº 3.293, DE 02 DE STEMBRO DE 2022", "decreto", 3293, 2022),
 ]
 
 
@@ -86,6 +105,76 @@ def test_citacao_jogada_para_o_inicio_da_linha_pela_quebra_do_pdf():
         ' Municipal de Transportes".\n' + RODAPE
     )
     assert cabecalhos(texto) == []
+
+
+def test_citacao_desmontada_palavra_por_palavra_nao_e_cabecalho():
+    """O PDF justificado põe cada palavra numa linha.
+
+    `Lei \\nnº048, \\nde \\n21 \\nde \\nnovembro de 2001` tem forma de cabeçalho,
+    começa uma linha e tem cauda curta — passa por todos os critérios de posição.
+    O que a denuncia é gastar quatro quebras de linha; cabeçalho legítimo gasta
+    no máximo uma, quando a diagramação o parte.
+    """
+    texto = ("Regulamenta dispositivo da\nLei \nnº048, \nde \n21 \nde \nnovembro"
+             " de 2001.\n" + RODAPE)
+    assert cabecalhos(texto) == []
+
+
+def test_cabecalho_partido_em_duas_linhas_e_aceito():
+    """`LEI COMPLEMENTAR` numa linha e o resto na seguinte é legítimo.
+
+    Proibir a quebra de linha para matar o caso acima custou 26 atos, entre eles
+    sete leis complementares. O critério é quantas quebras, não se há.
+    """
+    texto = "LEI COMPLEMENTAR\nNº 018 DE 11 DE DEZEMBRO DE 2015.\n" + RODAPE
+    achados = cabecalhos(texto)
+    assert len(achados) == 1
+    assert normalizar_tipo(achados[0].group(1)) == "lei_complementar"
+    assert numero_inteiro(achados[0].group(2)) == 18
+
+
+def test_rotulo_que_abre_o_ato_nao_e_continuacao_de_frase():
+    """A linha anterior ao cabeçalho costuma ser a fórmula de promulgação.
+
+    `PROMULGO A SEGUINTE LEI:` e `Republicado:` terminam em dois-pontos e ABREM
+    o ato. Tratá-los como frase inacabada custou o bloco das Leis 84 a 104/2002.
+    """
+    for antes in ("ORIGEM, PROMULGO A SEGUINTE LEI:", "Republicado:", ","):
+        texto = f"{antes}\nLEI Nº 100 / 2002 de 25 de abril de 2002.\n" + RODAPE
+        assert len(cabecalhos(texto)) == 1, antes
+
+
+def test_frase_inacabada_antes_do_cabecalho_recusa():
+    texto = ("Suprime-se o inciso IV, do artigo 17 da\n"
+             "Lei Municipal nº 53 de 13 de dezembro de 2001.\n" + RODAPE)
+    assert cabecalhos(texto) == []
+
+
+def test_palavra_qualquer_nao_passa_por_mes():
+    """`Decreto Nº 1.994/2017 \\nGABINETE` engolia o GABINETE como mês.
+
+    A moldura é o que separa: `GABINETE` vinha seguido de "DO PREFEITO", e não
+    de um ano. `STEMBRO`, entre um dia e 2022, está na posição do mês e em
+    nenhuma outra — por isso passa, mesmo sem conter raiz reconhecível.
+    """
+    achados = cabecalhos("Decreto Nº 1.994/2017 \nGABINETE DO PREFEITO\n" + RODAPE)
+    assert len(achados) == 1
+    assert "GABINETE" not in achados[0].group(0)
+    assert numero_inteiro(achados[0].group(2)) == 1994
+
+    emoldurado = cabecalhos(
+        "DECRETO Nº 3.293, DE 02 DE STEMBRO DE 2022\n" + RODAPE)
+    assert len(emoldurado) == 1
+    assert emoldurado[0].group(5).upper() == "STEMBRO"
+
+
+def test_mes_com_grafia_errada_na_origem_ainda_data_o_ato():
+    from legis.ingestao import _data_iso
+
+    assert _data_iso("19", "OUTRUBRO", "2006") == "2006-10-19"
+    assert _data_iso("02", "AGOSOTO", "2010") == "2010-08-02"
+    assert _data_iso("21", "DEJUNHO", "2006") == "2006-06-21"
+    assert _data_iso("10", "GABINETE", "2017") is None
 
 
 def test_linha_solta_sem_corpo_de_ato_nao_e_cabecalho():

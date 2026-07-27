@@ -374,6 +374,28 @@ class Acervo:
         parametros.append(max(1, min(limite, 100)))
         return [self._ato(l, "") for l in self.conexao.execute(" ".join(sql), parametros)]
 
+    def sem_texto(self, *, especie: str | None = None,
+                  ano: int | None = None) -> list[Ato]:
+        """Os atos que existem no acervo mas não têm texto pesquisável.
+
+        Existe porque `cobertura_do_acervo` sabia quantos são e nenhuma
+        ferramenta permitia recuperá-los como conjunto — e é justamente o
+        conjunto que importa: são os pontos cegos da base. Uma busca que não
+        acha nada num deles não significa nada, e o advogado precisa poder
+        checar se a norma que lhe interessa está nessa lista.
+        """
+        sql = ["SELECT * FROM atos WHERE situacao <> 'ok'"]
+        parametros: list[Any] = []
+        if especie:
+            sql.append("AND tipo = ?")
+            parametros.append(especie)
+        if ano is not None:
+            sql.append("AND ano = ?")
+            parametros.append(ano)
+        sql.append("ORDER BY ano, tipo, numero")
+        return [self._ato(l, "") for l in self.conexao.execute(" ".join(sql),
+                                                               parametros)]
+
     # -- vigência ---------------------------------------------------------
 
     def vigencia(self, identificador: str) -> dict[str, Any]:

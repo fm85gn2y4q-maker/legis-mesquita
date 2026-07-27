@@ -76,23 +76,84 @@ ROTULOS = {
 # 6 ano por extenso. A data inteira é opcional porque há cabeçalho que só traz
 # `LEI Nº 123/2002`; o ano, esse, é obrigatório — sem ele não há como
 # identificar o ato, e o candidato é descartado.
+# O cabeçalho ocupa UMA linha, e por isso o espaço interno aqui é `[ \t]`, não
+# `\s`. Com `\s`, que casa quebra de linha, a extração de PDF justificado — que
+# põe cada palavra numa linha — transformava a citação `Lei \nnº048, \nde \n21
+# \nde \nnovembro de 2001` em cabeçalho, e o ato que a citava era cortado ali.
+# A exceção é `LEI COMPLEMENTAR`, que a diagramação às vezes parte em duas.
+# Espaço interno do cabeçalho. Proibir a quebra de linha aqui foi a primeira
+# tentativa, e ela reprovou contra os dados: a diagramação parte cabeçalhos
+# legítimos — `LEI COMPLEMENTAR` numa linha e `Nº 018 DE 11 DE DEZEMBRO DE
+# 2015` na seguinte —, e a proibição custou 27 atos que tinham texto, entre
+# eles sete leis complementares. O que separa o cabeçalho partido da citação
+# desmontada não é haver quebra: é QUANTAS. Ver `MAXIMO_DE_QUEBRAS`.
+_E = r"\s"
+# O que separa os pedaços da data varia sem critério no acervo: vírgula, hífen,
+# travessão, a palavra "de", barra — e combinações delas. `DECRETO N.º162 – DE -
+# 18 DE SETEMBRO DE 2003` traz travessão, "DE" e hífen entre o número e o dia.
+# Enumerar as combinações seria interminável; aceitar o conjunto, com o limite
+# de não atravessar a linha, é o que funciona.
+_SEP = rf"(?:{_E}|[,;\-–—/]|DE(?![A-Za-zÀ-ÿ]))*"
+# O mês, reconhecido pela raiz de três letras e não pela grafia inteira.
+#
+# "Qualquer palavra de 4 a 9 letras" era permissivo demais: fazia `Decreto Nº
+# 1.994/2017 \nGABINETE` engolir o GABINETE como se fosse mês. Exigir as doze
+# palavras corretas foi ao outro extremo e custou cinco atos — porque quem
+# publicou errou a grafia:
+#
+#     DE OUTRUBRO DE 2006     DE AGOSOTO DE 2010    DE FEVEIRO DE 2023
+#     DEJUNHO DE 2006         DE OUTUIBRO DE 2002
+#
+# A raiz aceita as cinco e continua recusando GABINETE, que não contém nenhuma.
+_RAIZES = "JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ"
+_LETRAS = "A-Za-zÇÃÂÉÊÍÓÔÕÚÀçãâéêíóôõúà"
+# Segunda alternativa, para o erro que nem a raiz sobrevive: `DE 02 DE STEMBRO
+# DE 2022` — SETEMBRO sem o "E". Aqui não é a palavra que identifica o mês, é a
+# MOLDURA: qualquer palavra entre um dia e um ano de quatro dígitos, ligados por
+# "de", está na posição do mês e em nenhuma outra. Foi justamente a moldura que
+# faltou ao `GABINETE`, que vinha seguido de "DO PREFEITO".
+_MES = (rf"([A-Za-z]{{0,3}}(?:{_RAIZES})[{_LETRAS}]{{0,6}}"
+        rf"|[{_LETRAS}]{{4,10}}(?={_E}*DE{_E}+\d{{4}}))")
 CABECALHO = re.compile(
-    r"^[ \t]*[*\"“”'\-–—_]{0,4}[ \t]*"
-    r"(LEI\s+COMPLEMENTAR|LEI|DECRETO)\s+"
-    r"(?:MUNICIPAL\s+)?"
-    r"(?:N\s*[º°ᵒoO\.]{0,3}\s*)?"
+    # Prefixo: o que a diagramação põe antes do cabeçalho. `( * ) LEI Nº 110` e
+    # `(*) LEI Nº 135` marcam republicação, como o `*` sozinho.
+    r"^[ \t]*(?:\([ \t*]{0,4}\)[ \t]*)?[*\"“”'\-–—_]{0,4}[ \t]*"
+    rf"(LEI\s+COMPLEMENTAR|LEI{_E}+ORDIN[ÁA]RIA|LEI|DECRETO){_E}+"
+    rf"(?:MUNICIPAL{_E}+)?"
+    # `LEI DE Nº 1111 DE 04 DE JANEIRO DE 2019` — o "de" antes do número.
+    rf"(?:DE{_E}+)?"
+    # O ponto do "número" anda: `N. º 150`, `N.º162`, `nº. 060` — e às vezes
+    # vira vírgula: `Decreto nº, 215`. As quatro formas estão no acervo.
+    rf"(?:N{_E}*[.,]?{_E}*[º°ᵒoO]?{_E}*[.,]?{_E}*)?"
     # O `+` no grupo do separador de milhar não é cosmético. Com `*`, a
     # primeira alternativa casava "110" de `LEI Nº 1106` e o motor aceitava
     # o resto sem data — o ato ficava sem ano e era descartado em silêncio.
     # Exigindo pelo menos um ".000", o número sem separador cai na segunda
     # alternativa, que é gulosa e lê "1106" inteiro.
     r"(\d{1,3}(?:\.\d{3})+|\d{1,5})"
-    r"(?:\s*/\s*(\d{4}))?"
-    r"\s*[,\-–—]?\s*"
-    r"(?:(?:DE\s+)?(\d{1,2})\s*[º°ᵒ]?\s*(?:DE|/)\s*"
-    r"([A-Za-zÇÃÂÉÊÍÓÔÕÚÀçãâéêíóôõúà]{4,9})\s*"
-    r"(?:DE\s+|/)?\s*(\d{4}))?",
+    rf"(?:{_E}*/{_E}*(\d{{4}}))?"
+    # Dia e mês são opcionais: há cabeçalho sem dia — `LEI Nº 058 DE DEZEMBRO
+    # DE 2001` — e há cabeçalho só com `LEI Nº 123/2002`. Exigi-los custava o
+    # ato inteiro, porque sem casar a data o candidato ficava sem ano.
+    rf"(?:{_SEP}(\d{{1,2}}){_E}*[º°ᵒ]?(?![\d]))?"
+    rf"(?:{_SEP}{_MES})?"
+    rf"(?:{_SEP}(\d{{4}}))?",
     re.MULTILINE | re.IGNORECASE,
+)
+
+# Como uma linha termina quando a frase continua na seguinte. Terminando assim
+# a linha anterior ao candidato, o que vem abaixo é continuação de oração —
+# "Regulamenta dispositivo da" seguido de "Lei nº 048…" —, e não cabeçalho.
+# Sem isto, a quebra de linha do PDF basta para inverter o sentido da citação.
+# Só palavras de ligação. A primeira versão incluía `,` e `:`, e reprovou: a
+# linha que antecede o cabeçalho costuma ser justamente `PROMULGO A SEGUINTE
+# LEI:` ou `Republicado:` — rótulos que ABREM o ato, não frases cortadas —, e
+# no Diário há linhas contendo só uma vírgula. Custou 26 atos, entre eles o
+# bloco inteiro das Leis 84 a 104 de 2002.
+CONTINUACAO = re.compile(
+    r"\b(?:d[aeo]s?|n[ao]s?|pel[ao]s?|aos?|em|com|para|por|que|ou|e|à|às"
+    r"|sobre|entre|contra|conforme|constante|revoga|altera|regulamenta)\s*$",
+    re.IGNORECASE,
 )
 
 # O que o `re.IGNORECASE` deixou de fazer, a posição faz.
@@ -113,12 +174,32 @@ CORPO_DE_ATO = re.compile(
 )
 
 
+# Um cabeçalho legítimo cabe numa linha, ou em duas quando a diagramação o
+# parte (`LEI COMPLEMENTAR` / `Nº 018 DE 11 DE DEZEMBRO DE 2015`). A citação que
+# o PDF justificado desmonta palavra por palavra — `Lei \nnº048, \nde \n21 \nde
+# \nnovembro de 2001` — gasta quatro ou mais. A contagem de quebras separa as
+# duas coisas; proibir a quebra separava mal, e custou caro.
+MAXIMO_DE_QUEBRAS = 1
+
+
 def parece_cabecalho(texto: str, achado: re.Match) -> bool:
     """Decide se a ocorrência abre um ato ou apenas o cita."""
+    if achado.group(0).count("\n") > MAXIMO_DE_QUEBRAS:
+        return False
+
     quebra = texto.find("\n", achado.end())
     cauda = texto[achado.end(): quebra if quebra != -1 else len(texto)]
     if len(cauda.strip(" \t.\r\"“”';")) > RESTO_DA_LINHA:
         return False
+
+    # A linha de cima estava no meio de uma frase? Então isto é o resto dela.
+    anteriores = texto[:achado.start()].splitlines()
+    for linha in reversed(anteriores):
+        if linha.strip():
+            if CONTINUACAO.search(linha.rstrip()):
+                return False
+            break
+
     return bool(CORPO_DE_ATO.search(texto[achado.end(): achado.end() + 4000]))
 
 # Fórmulas que encerram a ementa e abrem o corpo do ato.
@@ -287,7 +368,16 @@ def paginas_do_pdf(caminho: Path) -> list[str]:
 
 
 def _data_iso(dia: str, mes: str, ano: str) -> str | None:
-    numero_mes = MESES.get(sem_acento(mes).upper())
+    limpo = sem_acento(mes).upper()
+    numero_mes = MESES.get(limpo)
+    if not numero_mes:
+        # Grafia errada na origem — "OUTRUBRO", "AGOSOTO", "DEJUNHO". A raiz de
+        # três letras identifica o mês sem ambiguidade, e datar o ato certo vale
+        # mais do que recusar a data por causa do erro de quem digitou.
+        for nome, numero in MESES.items():
+            if nome[:3] in limpo:
+                numero_mes = numero
+                break
     if not numero_mes:
         return None
     try:
@@ -336,7 +426,30 @@ def segmentar(caminho: Path, relativo: str) -> list[Segmento]:
         posicao += len(texto) + 1
     completo = "\n".join(inteiro)
 
-    achados = [a for a in CABECALHO.finditer(completo) if parece_cabecalho(completo, a)]
+    # Validar ANTES de delimitar. Antes esta lista trazia todo candidato que
+    # parecia cabeçalho, e a identidade do ato — número e ano — só era conferida
+    # no laço adiante. O candidato que falhava ali era descartado como ato, mas
+    # já tinha servido de FRONTEIRA: o ato anterior terminava nele. Resultado:
+    # atos cortados na ementa, com 110 caracteres, por causa de uma ocorrência
+    # que o próprio parser considerou inválida em seguida.
+    achados = []
+    for candidato in CABECALHO.finditer(completo):
+        if not parece_cabecalho(completo, candidato):
+            continue
+        numero = numero_inteiro(candidato.group(2))
+        ano_bruto = candidato.group(6) or candidato.group(3)
+        if numero is None or not ano_bruto:
+            continue
+        ano = int(ano_bruto)
+        # Mesquita se emancipou de Nova Iguaçu e foi instalada em 2001: não
+        # existe ato municipal anterior. O piso não é higiene de dados, é a
+        # regra que descarta a Lei Complementar 101/2000 — a LRF, federal —
+        # quando a diagramação a deixa sozinha numa linha e ela passa por
+        # cabeçalho.
+        if not (PRIMEIRO_ANO <= ano <= 2100):
+            continue
+        achados.append((candidato, normalizar_tipo(candidato.group(1)), numero, ano))
+
     if not achados:
         return []
 
@@ -356,22 +469,9 @@ def segmentar(caminho: Path, relativo: str) -> list[Segmento]:
         return pagina
 
     segmentos: list[Segmento] = []
-    for ordem, achado in enumerate(achados):
-        tipo = normalizar_tipo(achado.group(1))
-        numero = numero_inteiro(achado.group(2))
-        ano_bruto = achado.group(6) or achado.group(3)
-        if numero is None or not ano_bruto:
-            continue
-        ano = int(ano_bruto)
-        # Mesquita se emancipou de Nova Iguaçu e foi instalada em 2001: não
-        # existe ato municipal anterior. O piso não é higiene de dados, é a
-        # regra que descarta a Lei Complementar 101/2000 — a LRF, federal —
-        # quando a diagramação a deixa sozinha numa linha e ela passa por
-        # cabeçalho.
-        if not (PRIMEIRO_ANO <= ano <= 2100):
-            continue
-
-        fim = achados[ordem + 1].start() if ordem + 1 < len(achados) else len(completo)
+    for ordem, (achado, tipo, numero, ano) in enumerate(achados):
+        fim = (achados[ordem + 1][0].start() if ordem + 1 < len(achados)
+               else len(completo))
         corpo = completo[achado.start(): fim]
         autor = AUTOR.search(corpo[:600])
 
@@ -391,9 +491,13 @@ def segmentar(caminho: Path, relativo: str) -> list[Segmento]:
                 tipo=tipo,
                 numero=numero,
                 ano=ano,
+                # Dia, mês e ano: os três, ou data nenhuma. Cabeçalho sem dia
+                # existe (`LEI Nº 058 DE DEZEMBRO DE 2001`) e o ato entra assim
+                # mesmo — sem data exata, que é melhor do que uma inventada.
                 data=(
                     _data_iso(achado.group(4), achado.group(5), achado.group(6))
-                    if achado.group(4) and achado.group(6) else None
+                    if achado.group(4) and achado.group(5) and achado.group(6)
+                    else None
                 ),
                 ementa=extrair_ementa(corpo[achado.end() - achado.start():]),
                 autor=autor.group(1).strip(" .\t") if autor else None,

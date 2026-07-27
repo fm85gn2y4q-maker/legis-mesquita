@@ -33,15 +33,14 @@ inconstitucionalidade estão fora do alcance de qualquer base montada assim.
 
 | | |
 |---|---|
-| Atos | **4.129** — 2.864 decretos, 1.205 leis, 60 leis complementares |
-| Período | 2001–2026 |
-| Com texto integral pesquisável | 4.011 (97,1%) |
-| Sem texto (digitalização sem OCR) | 118 — constam com ementa |
-| Páginas indexadas | 10.163 |
-| Caracteres | 20,8 milhões |
-| Referências entre atos resolvidas | 702 |
-| Atos com revogação integral expressa | 76 |
-| Atos com revogação parcial expressa | 14 |
+| Atos | **4.128** — 2001 a 2026 |
+| Com texto integral pesquisável | 4.070 (98,6%) |
+| Sem texto | 58 — constam com ementa; veja `listar_atos_sem_texto` |
+| Páginas indexadas | 10.488 |
+| Caracteres | 21,9 milhões |
+| Referências entre atos resolvidas | 734 |
+| Atos com revogação integral expressa | 83 |
+| Atos com revogação parcial expressa | 15 |
 
 Construído a partir de 7.763 PDFs (3.964 distintos por hash), 3,6 GB.
 

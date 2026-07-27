@@ -471,6 +471,45 @@ def construir(
         }
 
     @mcp.tool()
+    def listar_atos_sem_texto(
+        especie: str | None = None, ano: int | None = None
+    ) -> dict[str, Any]:
+        """Lista os atos que constam do acervo mas não têm texto pesquisável.
+
+        São os pontos cegos da base: existem, têm ementa, e o corpo não foi
+        extraído. Uma busca por dispositivo que não encontre nada em nenhum
+        deles **não significa que a regra não exista** — significa que aquele
+        texto não está indexado.
+
+        Consulte antes de afirmar que o Município não tratou de um assunto, e
+        sempre que a norma que interessa ao caso for de espécie e ano cobertos
+        por esta lista.
+
+        Args:
+            especie: filtra por lei, lei_complementar ou decreto.
+            ano: ano exato.
+        """
+        achados = acervo.sem_texto(especie=_especie(especie), ano=ano)
+        por_ano: dict[int, int] = {}
+        for ato in achados:
+            por_ano[ato.ano] = por_ano.get(ato.ano, 0) + 1
+        return {
+            "quantidade": len(achados),
+            "por_ano": dict(sorted(por_ano.items())),
+            "resultados": [
+                {"id": a.id, "citacao": a.citacao, "ementa": a.ementa,
+                 "caracteres_extraidos": a.caracteres,
+                 "url_origem": a.url_origem}
+                for a in achados
+            ],
+            "observacao": (
+                "A ementa destes atos é confiável — vem do catálogo do portal. "
+                "O que falta é o corpo. Para o inteiro teor, abra o link de "
+                "origem ou consulte o Diário Oficial."
+            ),
+        }
+
+    @mcp.tool()
     def cobertura_do_acervo() -> dict[str, Any]:
         """Descreve o que existe na base: volumes, período, lacunas e limites.
 

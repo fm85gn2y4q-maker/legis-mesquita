@@ -349,7 +349,64 @@ caminho local **ou** URL, e o `preparar_release.py` imprime as duas formas.
 > pelos números que o produziram. Quando os números mudam, a decisão se
 > reexamina; o que não se admite é inverter sem dizer.
 
-## 16. Consolidação temporal: adiada de propósito
+## 16. O diff contra a versão anterior, e por que ele salvou o projeto
+
+A pergunta que abriu isto foi simples: *quais atos estão sem texto?* Eram 118.
+Medindo a causa, 104 tinham texto no PDF — não era digitalização, era o parser.
+
+Corrigi. A métrica agregada melhorou. E eu quase publiquei.
+
+O que impediu foi comparar **ato a ato** com a versão anterior, em vez de
+comparar totais:
+
+```
+tentativa 1:  63 ganharam · 27 perderam · 34 sumiram  ← 7 leis complementares
+tentativa 2:  63 ganharam · 26 perderam ·  9 sumiram
+tentativa 3:  63 ganharam ·  4 perderam ·  1 sumiu
+```
+
+Na primeira tentativa o total de atos com texto **subiu**. Se eu tivesse olhado
+só isso, teria publicado uma versão sem a LC 18/2015 — que altera o Código
+Tributário — e com uma tabela de melhorias para justificar.
+
+### As três correções, e o padrão entre elas
+
+Cada uma foi precisa numa direção e cega na oposta:
+
+| Problema | Primeira ideia | Efeito colateral | Regra final |
+|---|---|---|---|
+| Citação virando cabeçalho | proibir quebra de linha | matou `LEI COMPLEMENTAR` partida em duas | **contar** quebras: no máximo uma |
+| Frase continuando | recusar linha terminada em `,` ou `:` | matou `PROMULGO A SEGUINTE LEI:` | só palavras de ligação |
+| Palavra virando mês | exigir as doze grafias | matou `OUTRUBRO`, `AGOSOTO`, `DEJUNHO` | raiz de três letras, **ou** a moldura `DE dia DE … DE ano` |
+
+Nenhuma das três teria aparecido em teste: em todas eu estava consertando algo
+real, e o número agregado subia.
+
+> Correção não se avalia pelo que ela conserta. Avalia-se pelo diff — e o diff
+> tem de ser por registro, não por total.
+
+### O que o diff revelou sobre a versão que já estava no ar
+
+O achado mais desconfortável não foi sobre as correções: foi sobre `v1.0.0`,
+publicada e em produção.
+
+- A **Lei 418/2008** tinha 23.536 caracteres porque **engolia a Lei 419
+  inteira**, cujo cabeçalho não era reconhecido. Quem pedisse uma recebia duas.
+- O **Decreto 1.995/2017** servia o corpo do **Decreto 1.998**, capturado de
+  uma citação — `"nos termos do Decreto nº1995/2017; CONSIDERANDO…"`.
+- A **"Lei 95/2003"** não existe. Era um fantasma nascido de uma citação, e não
+  consta do catálogo do portal nem tem PDF.
+
+Oito atos estavam com texto de outro colado ao seu, e um número apontava para
+norma inexistente. Nada disso apareceu em 67 testes, nem na conferência de
+cobertura, nem no teste de aceitação — porque a busca funcionava, a citação
+saía formatada e o texto era real. Só era de outro ato.
+
+> É a quarta categoria de risco desta série, e a mais silenciosa: não é "quem
+> está falando", nem "qual redação vige", nem "de que ente é a norma". É **onde
+> este ato termina**.
+
+## 17. Consolidação temporal: adiada de propósito
 
 O salto seguinte desta base seria a **linha do tempo por dispositivo**. Hoje o
 acervo sabe:

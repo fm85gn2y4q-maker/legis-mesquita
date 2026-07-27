@@ -26,17 +26,20 @@ revogações **parciais** separado do de integrais — campo que só existe nest
 versão. Não vindo, remova e recrie o conector (ou reinstale a extensão) antes
 de rodar qualquer coisa.
 
-Os números da versão `v1.0.0`, conferidos pelo protocolo contra o pacote:
+Os números da versão `v1.1.0`, conferidos contra o artefato publicado:
 
 | | |
 |---|---|
-| Atos | **4.129** |
-| Com texto integral | 4.011 |
-| Páginas indexadas | 10.163 |
-| Atos com revogação **integral** | **76** |
-| Atos com revogação **parcial** | **14** |
+| Atos | **4.128** |
+| Com texto integral | 4.070 |
+| Páginas indexadas | 10.488 |
+| Atos com revogação **integral** | **83** |
+| Atos com revogação **parcial** | **15** |
 
 Se isso não aparecer, o teste não começa.
+
+Vindo **4.129 / 4.011 / 10.163 / 76 / 14**, o cliente está com a `v1.0.0` em
+cache — remova e recrie o conector, ou reinstale a extensão.
 
 ---
 
