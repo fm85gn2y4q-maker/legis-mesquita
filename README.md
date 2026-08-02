@@ -45,6 +45,45 @@ inconstitucionalidade estão fora do alcance de qualquer base montada assim.
 O acervo se mantém em dia pelo Diário Oficial: `python -m legis.ingestao` lê,
 além dos PDFs por ato, as edições do DOM a partir de `--desde`.
 
+---
+
+## Rotina semanal
+
+```bash
+python atualizar.py
+```
+
+Baixa as edições novas do Diário, reprocessa em `dados/staging.sqlite` e compara
+com o acervo publicado. **Não publica.** O acervo no ar não é tocado, e a
+decisão de promover o novo é humana.
+
+O código de saída é o aviso:
+
+| | |
+|---|---|
+| `0` | nada exige leitura — só acréscimo, ou nada mudou |
+| `1` | algo sumiu, perdeu texto ou encolheu — **alguém precisa olhar** |
+| `2` | a coleta ou o reprocessamento falhou |
+
+O relatório fica em `dist/diferenca-<data>.md`.
+
+A separação é deliberada, e tem motivo registrado no `METODO.md`: três vezes
+neste projeto uma correção do extrator fez o número de atos com texto **subir**
+enquanto atos reais desapareciam — numa delas, sete leis complementares. Um
+pipeline que publicasse sozinho teria levado isso ao ar.
+
+Está agendada no Windows para **segunda-feira às 9h**:
+
+```bash
+Get-ScheduledTask -TaskName "Legislacao Mesquita - atualizacao semanal"
+```
+
+Para comparar dois acervos quaisquer, fora da rotina:
+
+```bash
+python -m legis.comparar acervo/legislacao-mesquita-v1.2.0.db.gz dados/mesquita.sqlite
+```
+
 Construído a partir de 7.763 PDFs (3.964 distintos por hash), 3,6 GB.
 
 Cinco normas foram **recusadas nominalmente** por não pertencerem à série

@@ -12,3 +12,7 @@ dados/*.sqlite
 dados/*.sqlite-wal
 dados/*.sqlite-shm
 *.mcpb
+
+# staging e relatorios da rotina semanal: derivados, nao codigo-fonte
+dados/staging.sqlite*
+dist/
