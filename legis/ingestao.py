@@ -189,7 +189,16 @@ def parece_cabecalho(texto: str, achado: re.Match) -> bool:
 
     quebra = texto.find("\n", achado.end())
     cauda = texto[achado.end(): quebra if quebra != -1 else len(texto)]
-    if len(cauda.strip(" \t.\r\"“”';")) > RESTO_DA_LINHA:
+    resto = cauda.strip(" \t.\r\"“”';")
+    if len(resto) > RESTO_DA_LINHA:
+        return False
+    # Depois da data, cabeçalho não tem PALAVRA — tem ponto, ou nada. Medir só
+    # o comprimento deixou passar uma decisão administrativa publicada no
+    # Diário: `LEI MUNICIPAL No 017/2014, COM REDAÇÃO DA LEI` começa a linha,
+    # vem logo abaixo do cabeçalho da página (que não é frase inacabada) e tem
+    # cauda de 20 caracteres — dentro do limite. Ela criaria uma "Lei 17/2014"
+    # com 15.884 caracteres de texto de 2026.
+    if any(c.isalpha() for c in resto):
         return False
 
     # A linha de cima estava no meio de uma frase? Então isto é o resto dela.
@@ -209,6 +218,53 @@ FIM_DA_EMENTA = re.compile(
     re.IGNORECASE,
 )
 AUTOR = re.compile(r"^\s*Autor\s*:\s*(.{3,80})$", re.MULTILINE | re.IGNORECASE)
+
+# --- onde o ato termina ------------------------------------------------------
+#
+# Numa página de Diário, o ato acaba e a edição continua: vêm portarias,
+# extratos de ata, editais, decisões administrativas. Sem fechar a fronteira, o
+# segmento vai até o próximo cabeçalho de LEI ou DECRETO — que pode estar 23 mil
+# caracteres adiante. Medido: a Lei 1.290/2026, que renomeia uma rua, carregava
+# 97% de texto alheio, e responderia a busca por "registro de preços".
+#
+# O corte NÃO pode ser na assinatura. Muitos decretos têm o conteúdo principal
+# no anexo, que vem depois dela: `decreto-2001-2017` são 848 caracteres de ato e
+# 190 mil de Quadro de Detalhamento. Cortar ali destruiria o que mais importa.
+#
+# A regra é cortar só quando OUTRO DOCUMENTO começa — identificado positivamente
+# pelo seu próprio cabeçalho, em início de linha. Conferido em 4.075 atos: 3.054
+# ficam intactos, e os seis controles que terminam em anexo não perdem nada.
+ASSINATURA = re.compile(
+    r"Mesquita,?\s*\d{1,2}\s+de\s+[A-Za-zÀ-ÿ]+\s+de\s+\d{4}", re.IGNORECASE)
+OUTRO_DOCUMENTO = re.compile(
+    r"^[ \t]*(?:"
+    r"EXTRATO\s+(?:DE|DO|DA)\b"
+    r"|PORTARIA\s+(?:N|DPMM|READAPTA)"
+    r"|DECIS[ÃA]O\s+(?:PROCESSO|N)"
+    r"|EDITAL\s+(?:DE|N)"
+    r"|AVISO\s+(?:DE|N)"
+    r"|TERMO\s+(?:ADITIVO|DE\s+(?:HOMOLOGA|ADJUDICA|RESCIS|COOPERA))"
+    r"|ATA\s+DE\s+REGISTRO"
+    r"|CONTRATO\s+ADMINISTRATIVO"
+    r"|PREG[ÃA]O\s+(?:ELETR|PRESENC|N)"
+    r"|CONVOCA[ÇC][ÃA]O\b"
+    r"|ERRATA\s*\d*\s*:"
+    r"|EMENTA\s*:"
+    r"|RESUMO\s+DE\s+"
+    r"|DESPACHO\s+(?:DO|N)"
+    r")", re.MULTILINE)
+
+# Antes deste ponto não se procura outro documento: é o corpo do próprio ato,
+# que pode citar "portaria" ou "edital" em prosa.
+INICIO_MINIMO = 200
+
+
+def fim_do_ato(texto: str) -> int | None:
+    """Posição em que outro documento do Diário começa, ou None."""
+    assinatura = ASSINATURA.search(texto, INICIO_MINIMO)
+    daqui = assinatura.end() if assinatura else INICIO_MINIMO
+    achado = OUTRO_DOCUMENTO.search(texto, daqui)
+    return achado.start() if achado else None
 
 # Cabeçalho do Diário Oficial: "Mesquita, Sexta-feira, 11 de janeiro de 2019 | Nº 00670"
 DIARIO = re.compile(
@@ -472,6 +528,14 @@ def segmentar(caminho: Path, relativo: str) -> list[Segmento]:
     for ordem, (achado, tipo, numero, ano) in enumerate(achados):
         fim = (achados[ordem + 1][0].start() if ordem + 1 < len(achados)
                else len(completo))
+
+        # A fronteira vale para o texto E para as páginas: é a tabela `paginas`
+        # que alimenta `pesquisar_dispositivos`, e sem cortá-la também a busca
+        # continuaria achando a portaria alheia dentro do ato.
+        corte = fim_do_ato(completo[achado.start(): fim])
+        if corte is not None:
+            fim = achado.start() + corte
+
         corpo = completo[achado.start(): fim]
         autor = AUTOR.search(corpo[:600])
 
@@ -652,6 +716,33 @@ def da_serie_municipal(
     return (tipo, numero) not in FEDERAIS
 
 
+DIARIO_ARQUIVO = re.compile(r"DOM_(\d{4}-\d{2}-\d{2})_(\d+)\.pdf$", re.IGNORECASE)
+
+
+def edicoes_do_diario(pasta: Path, desde: str | None) -> Iterator[tuple[Path, str]]:
+    """Edições do Diário Oficial a partir de uma data, para atualização.
+
+    O coletor da seção de legislação do portal não existe mais nesta máquina —
+    restaram só os relatórios que ele gerou. O acervo do Diário, esse, tem
+    script incremental. Medido: o parser encontra nas edições do Diário os
+    mesmos atos que encontrava nos PDFs por ato, o que torna o Diário a fonte
+    natural para manter o acervo em dia.
+
+    O corte por data existe para que a atualização seja pequena e o diff,
+    auditável. Sem ele seriam 2.653 edições — outro projeto.
+    """
+    if not pasta.is_dir():
+        return
+    for ano in sorted(p for p in pasta.iterdir() if p.is_dir()):
+        for caminho in sorted(ano.glob("DOM_*.pdf")):
+            achado = DIARIO_ARQUIVO.search(caminho.name)
+            if not achado:
+                continue
+            if desde and achado.group(1) < desde:
+                continue
+            yield caminho, f"DOM/{ano.name}/{caminho.name}"
+
+
 def pdfs_unicos(pasta: Path) -> Iterator[tuple[Path, str]]:
     """Percorre os PDFs ignorando as cópias `_vN` de conteúdo idêntico.
 
@@ -749,7 +840,8 @@ INSERT INTO paginas_fts(rowid, texto) SELECT rowid, texto FROM paginas;
 """
 
 
-def construir(pasta: Path, banco: Path, limite: int | None = None) -> dict:
+def construir(pasta: Path, banco: Path, limite: int | None = None,
+              pasta_diarios: Path | None = None, desde: str | None = None) -> dict:
     pasta, banco = Path(pasta), Path(banco)
     banco.parent.mkdir(parents=True, exist_ok=True)
     if banco.exists():
@@ -767,12 +859,22 @@ def construir(pasta: Path, banco: Path, limite: int | None = None) -> dict:
     # Um mesmo ato aparece em vários arquivos (a cópia isolada e a página do
     # Diário). Guarda-se o segmento mais longo: é o que traz o ato inteiro.
     melhores: dict[tuple[str, int, int], Segmento] = {}
-    diarios: dict[str, tuple[str, str]] = {}
+    # Publicação de cada ato no Diário. Chamava-se `diarios`, e o parâmetro novo
+    # com a pasta das edições recebeu o mesmo nome: este dicionário vazio o
+    # sobrescrevia três linhas antes de ser usado, e `if diarios` dava falso.
+    # O Diário nunca era lido, sem erro nenhum — código correto que não faz nada.
+    publicacoes: dict[str, tuple[str, str]] = {}
     contagem = {"arquivos": 0, "sem_texto": 0, "sem_cabecalho": 0, "segmentos": 0,
                 "fora_da_serie_municipal": 0}
     recusados: set[tuple[str, int, int]] = set()
 
-    for caminho, relativo in pdfs_unicos(pasta):
+    from itertools import chain
+
+    fontes = chain(
+        pdfs_unicos(pasta),
+        edicoes_do_diario(pasta_diarios, desde) if pasta_diarios else iter(()),
+    )
+    for caminho, relativo in fontes:
         contagem["arquivos"] += 1
         if limite and contagem["arquivos"] > limite:
             break
@@ -800,7 +902,7 @@ def construir(pasta: Path, banco: Path, limite: int | None = None) -> dict:
             if anterior is None or len(segmento.texto) > len(anterior.texto):
                 melhores[chave] = segmento
                 if segmento.diario:
-                    diarios[identificador(*chave)] = segmento.diario
+                    publicacoes[identificador(*chave)] = segmento.diario
 
     print(f"lidos {contagem['arquivos']} arquivos → {len(melhores)} atos distintos",
           flush=True)
@@ -840,7 +942,7 @@ def construir(pasta: Path, banco: Path, limite: int | None = None) -> dict:
         ementa_oficial = (meta.get("ementa") or "").strip()
         ementa = ementa_oficial or segmento.ementa
         fonte_ementa = "portal" if ementa_oficial else ("pdf" if segmento.ementa else "")
-        diario = diarios.get(identidade)
+        diario = publicacoes.get(identidade)
 
         conexao.execute(
             "INSERT OR REPLACE INTO atos VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -983,7 +1085,18 @@ if __name__ == "__main__":
     analisador.add_argument("--banco", default=str(Path(__file__).parent.parent / "dados" / "mesquita.sqlite"))
     analisador.add_argument("--limite", type=int, default=None,
                             help="processa só os N primeiros PDFs (calibração)")
+    analisador.add_argument(
+        "--diarios", default=os.path.expanduser("~/Mesquita_Diarios_Oficiais/municipio"),
+        help="acervo do Diário Oficial, usado para manter o acervo em dia")
+    analisador.add_argument(
+        "--desde", default="2026-07-21", metavar="AAAA-MM-DD",
+        help="lê do Diário só as edições a partir desta data; use 2015-01-01 "
+             "para ler tudo (são 2.653 edições — outro projeto)")
     argumentos = analisador.parse_args()
 
-    resumo = construir(Path(argumentos.pasta), Path(argumentos.banco), argumentos.limite)
+    resumo = construir(
+        Path(argumentos.pasta), Path(argumentos.banco), argumentos.limite,
+        pasta_diarios=Path(argumentos.diarios) if argumentos.diarios else None,
+        desde=argumentos.desde,
+    )
     print(json.dumps(resumo, ensure_ascii=False, indent=2))

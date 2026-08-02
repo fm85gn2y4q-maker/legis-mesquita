@@ -33,14 +33,17 @@ inconstitucionalidade estão fora do alcance de qualquer base montada assim.
 
 | | |
 |---|---|
-| Atos | **4.128** — 2001 a 2026 |
-| Com texto integral pesquisável | 4.070 (98,6%) |
+| Atos | **4.133** — 2001 a 2026 |
+| Com texto integral pesquisável | 4.075 (98,6%) |
 | Sem texto | 58 — constam com ementa; veja `listar_atos_sem_texto` |
-| Páginas indexadas | 10.488 |
-| Caracteres | 21,9 milhões |
-| Referências entre atos resolvidas | 734 |
+| Páginas indexadas | 10.512 |
+| Caracteres | 20,3 milhões |
+| Referências entre atos resolvidas | 712 |
 | Atos com revogação integral expressa | 83 |
-| Atos com revogação parcial expressa | 15 |
+| Atos com revogação parcial expressa | 16 |
+
+O acervo se mantém em dia pelo Diário Oficial: `python -m legis.ingestao` lê,
+além dos PDFs por ato, as edições do DOM a partir de `--desde`.
 
 Construído a partir de 7.763 PDFs (3.964 distintos por hash), 3,6 GB.
 

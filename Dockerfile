@@ -24,9 +24,12 @@ COPY legis/ ./legis/
 # vez de subir um acervo diferente daquele que foi testado. Publicar acervo
 # novo é trocar estas duas linhas e commitar o novo .gz.
 #
-# Gerado por `python preparar_release.py 1.1.0`: 4.128 atos, 72,5 → 22,8 MB.
-ARG ACERVO=acervo/legislacao-mesquita-v1.1.0.db.gz
-ARG ACERVO_SHA256=b0f971645b8c844718a719de415509b2c8db84e9928e27e94e7e049135159758
+# Gerado por `python preparar_release.py 1.2.0`: 4.133 atos, 67,7 → 21,0 MB.
+# Menor que a v1.1.0 apesar de ter mais atos: saíram 1,8 milhão de caracteres
+# que pertenciam a portarias, extratos e decisões publicados na mesma edição
+# do Diário e que estavam colados dentro dos atos.
+ARG ACERVO=acervo/legislacao-mesquita-v1.2.0.db.gz
+ARG ACERVO_SHA256=7dffed247e90746a25d64d238139018140f083d366d4db932805e783bd68b48b
 COPY instalar_acervo.py ./
 COPY acervo/ ./acervo/
 RUN python instalar_acervo.py "$ACERVO" dados/mesquita.sqlite "$ACERVO_SHA256" \

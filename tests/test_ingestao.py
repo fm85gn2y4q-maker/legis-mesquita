@@ -177,6 +177,28 @@ def test_mes_com_grafia_errada_na_origem_ainda_data_o_ato():
     assert _data_iso("10", "GABINETE", "2017") is None
 
 
+def test_cauda_com_palavra_nao_e_cabecalho():
+    """Decisão administrativa publicada no Diário, começando a linha.
+
+    `LEI MUNICIPAL No 017/2014, COM REDAÇÃO DA LEI` vem logo abaixo do cabeçalho
+    da página — que não é frase inacabada — e tem cauda de 20 caracteres, dentro
+    do limite de comprimento. Criaria uma "Lei 17/2014" com 15.884 caracteres de
+    texto de 2026. O que a denuncia é a cauda ter PALAVRA: depois da data, um
+    cabeçalho traz ponto, ou nada.
+    """
+    texto = ("Mesquita, Quinta-Feira, 30 de julho de 2026 | Nº 02494.\n"
+             "LEI MUNICIPAL No 017/2014, COM REDAÇÃO DA LEI\n"
+             "COMPLEMENTAR No 018/2015. DECISÃO\n" + RODAPE)
+    assert cabecalhos(texto) == []
+
+
+def test_cauda_de_pontuacao_continua_valendo():
+    for linha in ("LEI Nº 1.290, DE 30 DE JULHO DE 2026",
+                  "LEI Nº 1.290, DE 30 DE JULHO DE 2026.",
+                  "DECRETO Nº 3.918, DE 28 DE JULHO DE 2026 ."):
+        assert len(cabecalhos(linha + "\n" + RODAPE)) == 1, linha
+
+
 def test_linha_solta_sem_corpo_de_ato_nao_e_cabecalho():
     """Anexo que lista normas revogadas: posição boa, mas não há ato abaixo."""
     texto = (
@@ -430,6 +452,67 @@ def test_teto_vem_do_catalogo_e_nao_de_constante_escolhida():
     assert tetos["decreto"] == 3917 + 50
     # Sem série própria no catálogo, a complementar herda o teto da lei.
     assert tetos["lei_complementar"] == tetos["lei"]
+
+
+CORPO_DO_ATO = (
+    "LEI Nº 1.290, DE 30 DE JULHO DE 2026\n"
+    "“Dispõe sobre alterar o nome do logradouro público Rua Amazonas”.\n"
+    "A CÂMARA MUNICIPAL DE MESQUITA aprovou e eu sanciono a seguinte Lei:\n"
+    "Art. 1º - Fica alterado o nome da Rua Amazonas, no Bairro Coreia.\n"
+    "Art. 2º - Esta Lei entra em vigor na data de sua publicação.\n"
+    "Mesquita, 30 de julho de 2026.\n"
+    "MAROTTO MIRANDA\nPrefeito\n"
+)
+
+
+def test_ato_termina_onde_comeca_outro_documento():
+    """Numa página de Diário o ato acaba e a edição continua.
+
+    A Lei 1.290/2026 renomeia uma rua e carregava 24.108 caracteres — 97% deles
+    extratos de ata, portarias e decisões de IPTU que vieram atrás na mesma
+    edição. Ela responderia a uma busca por "registro de preços".
+    """
+    from legis.ingestao import fim_do_ato
+
+    for alheio in ("EXTRATO DE ATA DE REGISTRO DE PREÇOS\nATA Nº 09/2026\n",
+                   "PORTARIA Nº 453/2026\nAltera a Comissão de Fiscalização\n",
+                   "DECISÃO PROCESSO - 05/5265/23\n1 - À luz dos pareceres\n",
+                   "EMENTA: ISENÇÃO TRIBUTÁRIA. IPTU. IDOSO.\n"):
+        inteiro = CORPO_DO_ATO + alheio
+        corte = fim_do_ato(inteiro)
+        assert corte is not None, alheio[:20]
+        assert corte == len(CORPO_DO_ATO), alheio[:20]
+
+
+def test_anexo_vem_depois_da_assinatura_e_e_do_ato():
+    """O corte não pode ser na assinatura.
+
+    `decreto-2001-2017` são 848 caracteres de ato e 190 mil de Quadro de
+    Detalhamento, que vem depois de "Mesquita, <data> / Prefeito". Cortar ali
+    destruiria justamente o conteúdo que o ato aprova.
+    """
+    from legis.ingestao import fim_do_ato
+
+    for anexo in ("ANEXO I – CLASSIFICAÇÃO DE ATIVIDADES\nCNAE  DESCRIÇÃO\n",
+                  "Anexo I – Classificação por Risco Sanitário\n",
+                  "ANEXO 01\nTABELA DE MULTAS\nDESCRIÇÃO  VALOR EM UFIME\n",
+                  "www.mesquita.rj.gov.br\nNº 00434.\n30  FUNDO  27.510.180,00\n"):
+        assert fim_do_ato(CORPO_DO_ATO + anexo) is None, anexo[:20]
+
+
+def test_palavra_solta_no_corpo_do_ato_nao_encerra():
+    """O ato pode citar portaria ou edital em prosa, e isso não o encerra."""
+    from legis.ingestao import fim_do_ato
+
+    texto = (
+        "DECRETO Nº 3.900, DE 1º DE JULHO DE 2026\n"
+        "“Regulamenta a fiscalização de contratos”.\n"
+        "O PREFEITO DO MUNICÍPIO DE MESQUITA DECRETA:\n"
+        "Art. 1º - A designação de fiscal far-se-á por portaria do secretário,\n"
+        "observado o edital de licitação e o contrato administrativo firmado.\n"
+        "Mesquita, 1º de julho de 2026.\nJORGE MIRANDA\nPrefeito\n"
+    )
+    assert fim_do_ato(texto) is None
 
 
 def test_numero_com_separador_de_milhar():

@@ -406,7 +406,96 @@ saía formatada e o texto era real. Só era de outro ato.
 > está falando", nem "qual redação vige", nem "de que ente é a norma". É **onde
 > este ato termina**.
 
-## 17. Consolidação temporal: adiada de propósito
+## 17. Onde o ato termina — a fronteira, e o corte que não pode ser feito
+
+Descoberto ao atualizar o acervo com o Diário Oficial: a **Lei 1.290/2026, que
+renomeia uma rua, tinha 24.108 caracteres**. O ato acaba em 718; os 23 mil
+seguintes eram extratos de ata de registro de preços, portarias do DPMM e
+decisões de IPTU publicadas na mesma edição.
+
+Numa página de Diário o ato acaba e a edição continua. Sem fechar a fronteira,
+o segmento vai até o próximo cabeçalho de LEI ou DECRETO — que pode estar vinte
+mil caracteres adiante.
+
+### O corte óbvio é o errado
+
+A tentação é cortar na assinatura: `Mesquita, <data> / <nome> / Prefeito`. Uma
+medição rápida sugeria 614 atos "inflados" por esse critério.
+
+**Esse número era falso**, e olhar os maiores mostrou por quê:
+
+```
+decreto-2001-2017  "Aprova, na forma do Anexo I, o Quadro de Detalhamento"
+                    848 caracteres de ato · 190.150 de anexo
+lei-1251-2024      "INSTITUI A POLÍTICA DE RESÍDUOS SÓLIDOS ... E O PLANO"
+                  4.571 caracteres de ato ·  76.187 de plano anexo
+```
+
+**O anexo vem depois da assinatura, e é o conteúdo que o ato aprova.** Cortar
+ali destruiria Quadros de Detalhamento, tabelas de classificação de atividades
+econômicas e planos municipais inteiros — justamente o que se consulta.
+
+### A regra: cortar só o que se identifica positivamente
+
+Fui ler o que aparece depois da assinatura, e são três coisas:
+
+| O que vem | Exemplos reais | É do ato? |
+|---|---|---|
+| Anexo | `ANEXO I – CLASSIFICAÇÃO DE ATIVIDADES`, `ANEXO 01 TABELA DE MULTAS` | sim |
+| Mobília da página | `www.mesquita.rj.gov.br`, `Nº 00434`, traços | inofensivo |
+| Outro documento | `EXTRATO DE TERMO ADITIVO`, `PORTARIA Nº 131/2014`, `DECISÃO PROCESSO` | **não** |
+
+O corte acontece **só no terceiro caso**, identificado pelo cabeçalho do outro
+documento em início de linha. Nunca na assinatura.
+
+### Validar antes de aplicar, contra o acervo inteiro
+
+A regra foi rodada sobre os 4.075 atos **sem gravar nada**:
+
+```
+intactos: 3.054      cortados: 1.021      removidos: 1.821.182 caracteres
+```
+
+E os seis controles que terminam em anexo ficaram intactos, byte a byte.
+
+Depois, o diff contra produção: 588 atos encolheram, e as 30 referências que
+saíram do grafo de vigência foram conferidas uma a uma. **Todas vinham de
+documento alheio** — a maioria de decisões de IPTU cuja ementa cita `LEI
+COMPLEMENTAR MUNICIPAL 017/2014, ALTERADO PELA 018/2015`, e uma de um edital
+de convocação cujo preâmbulo cita competência. Nenhuma perda legítima.
+
+> A fronteira precisa valer também para a tabela de páginas, não só para o
+> texto. É ela que alimenta a busca por dispositivo: cortar só o texto deixaria
+> a portaria alheia pesquisável dentro do ato.
+
+### Por que isto é a quarta categoria de risco
+
+Não é "não achou" nem "achou o errado": é **achou o certo e entregou junto o
+que não é dele**. A Lei 1.290 responderia a uma busca por "registro de preços"
+ou "perícia médica" — assuntos que ela não trata —, com citação impecável.
+
+## 18. Código correto que não faz nada
+
+Ao ligar o Diário Oficial à ingestão, dei ao parâmetro novo o nome de uma
+variável local que já existia:
+
+```python
+def construir(..., diarios: Path | None = None):
+    ...
+    diarios: dict[str, tuple[str, str]] = {}     # ← sobrescreve, oito linhas depois
+    ...
+    edicoes_do_diario(diarios, desde) if diarios else iter(())
+```
+
+O dicionário vazio substituía o caminho da pasta, e `if {}` é falso. **Nenhuma
+exceção, nenhum aviso, 90 testes passando.** A ingestão rodou treze minutos e
+reportou `lidos 3964 arquivos` — o mesmo número da rodada anterior, que foi a
+única pista de que nada havia sido lido.
+
+> Código que quebra se acha pelo erro. Código correto que não faz nada só se
+> acha pelo número que deveria ter mudado e não mudou.
+
+## 19. Consolidação temporal: adiada de propósito
 
 O salto seguinte desta base seria a **linha do tempo por dispositivo**. Hoje o
 acervo sabe:
