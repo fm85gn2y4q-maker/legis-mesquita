@@ -1,4 +1,4 @@
-# Legislação de Mesquita — servidor MCP
+﻿# Legislação de Mesquita — servidor MCP
 
 Leis ordinárias, leis complementares e decretos do Município de Mesquita/RJ,
 expostos como ferramenta de pesquisa para o Claude e o ChatGPT.
@@ -33,10 +33,10 @@ inconstitucionalidade estão fora do alcance de qualquer base montada assim.
 
 | | |
 |---|---|
-| Atos | **4.133** — 2001 a 2026 |
-| Com texto integral pesquisável | 4.075 (98,6%) |
+| Atos | **4.134** — 2001 a 2026 |
+| Com texto integral pesquisável | 4.076 (98,6%) |
 | Sem texto | 58 — constam com ementa; veja `listar_atos_sem_texto` |
-| Páginas indexadas | 10.512 |
+| Páginas indexadas | 10.514 |
 | Caracteres | 20,3 milhões |
 | Referências entre atos resolvidas | 712 |
 | Atos com revogação integral expressa | 83 |
@@ -72,7 +72,7 @@ neste projeto uma correção do extrator fez o número de atos com texto **subir
 enquanto atos reais desapareciam — numa delas, sete leis complementares. Um
 pipeline que publicasse sozinho teria levado isso ao ar.
 
-Está agendada no Windows para **segunda-feira às 9h**:
+Está agendada no Windows para **sábado às 10h**:
 
 ```bash
 Get-ScheduledTask -TaskName "Legislacao Mesquita - atualizacao semanal"
@@ -81,7 +81,7 @@ Get-ScheduledTask -TaskName "Legislacao Mesquita - atualizacao semanal"
 Para comparar dois acervos quaisquer, fora da rotina:
 
 ```bash
-python -m legis.comparar acervo/legislacao-mesquita-v1.2.0.db.gz dados/mesquita.sqlite
+python -m legis.comparar acervo/legislacao-mesquita-v1.3.0.db.gz dados/mesquita.sqlite
 ```
 
 Construído a partir de 7.763 PDFs (3.964 distintos por hash), 3,6 GB.
@@ -158,7 +158,7 @@ python -m legis.publicar
 ```
 
 Hospedagem permanente: o `Dockerfile` e o `render.yaml` estão prontos, e o
-acervo comprimido viaja no repositório (`acervo/`, 21,6 MB). A imagem o
+acervo comprimido viaja no repositório (`acervo/`, 21,0 MB). A imagem o
 descomprime conferindo o sha256 declarado — divergindo, a construção falha em
 vez de subir acervo diferente do testado.
 

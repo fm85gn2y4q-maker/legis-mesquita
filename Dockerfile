@@ -28,8 +28,8 @@ COPY legis/ ./legis/
 # Menor que a v1.1.0 apesar de ter mais atos: saíram 1,8 milhão de caracteres
 # que pertenciam a portarias, extratos e decisões publicados na mesma edição
 # do Diário e que estavam colados dentro dos atos.
-ARG ACERVO=acervo/legislacao-mesquita-v1.2.0.db.gz
-ARG ACERVO_SHA256=7dffed247e90746a25d64d238139018140f083d366d4db932805e783bd68b48b
+ARG ACERVO=acervo/legislacao-mesquita-v1.3.0.db.gz
+ARG ACERVO_SHA256=c396f3b9c5dbe83e16785dac92b1350edd937d412c2126fb5fe335d1687c24ae
 COPY instalar_acervo.py ./
 COPY acervo/ ./acervo/
 RUN python instalar_acervo.py "$ACERVO" dados/mesquita.sqlite "$ACERVO_SHA256" \
