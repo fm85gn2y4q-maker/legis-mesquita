@@ -1,6 +1,8 @@
 # Ingestão (roda na sua máquina) + servidor.
 # Para a imagem de hospedagem, veja requirements-servidor.txt: ela não precisa
 # do PyMuPDF, porque não processa PDF — só serve o acervo já construído.
-mcp>=1.28
+mcp>=1.28,<2
 pymupdf>=1.24
 pytest>=8.0
+# O plugin pytest do anyio roda o teste que sobe o .mcpb construído por stdio.
+anyio>=4.0

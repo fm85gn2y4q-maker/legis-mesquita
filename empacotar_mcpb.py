@@ -134,6 +134,28 @@ MANIFESTO = {
 }
 
 
+def _exigencias() -> list[str]:
+    """Lê o pin de `requirements-servidor.txt` em vez de repeti-lo aqui.
+
+    Repetir custou caro: a versão anterior deste script pedia `mcp>=1.28`, sem
+    teto, e empacotou a **2.0.0** — em que `mcp.server.fastmcp` deixou de
+    existir. O pacote zipava, instalava e só quebrava quando o usuário fizesse a
+    primeira pergunta, com "No module named 'mcp.server.fastmcp'" num log que
+    ele não lê. Duas declarações da mesma dependência divergem em silêncio; uma
+    só, não.
+
+    Diagnosticado em 05/08/2026, no projeto irmão `financas-mesquita`, onde o
+    mesmo defeito apareceu — e aqui o pacote em `dist/` já estava quebrado.
+    """
+    arquivo = RAIZ / "requirements-servidor.txt"
+    linhas = [l.split("#")[0].strip()
+              for l in arquivo.read_text(encoding="utf-8").splitlines()]
+    exigencias = [l for l in linhas if l]
+    if not exigencias:
+        raise SystemExit(f"{arquivo} não declara nenhuma dependência.")
+    return exigencias
+
+
 def validar(pasta: Path) -> bool:
     """Passa o manifesto pelo validador oficial, se houver Node por perto.
 
@@ -254,13 +276,15 @@ def empacotar(python: str | None = None) -> int:
     )
     (servidor / "main.py").write_text(ENTRADA, encoding="utf-8")
 
+    exigencias = _exigencias()
+    print("  dependências:", ", ".join(exigencias))
     for versao in VERSOES:
         marca = "py" + versao.replace(".", "")
         print(f"Instalando as dependências para Python {versao}…")
         resultado = subprocess.run(
             [sys.executable, "-m", "pip", "install", "--quiet",
              "--target", str(servidor / "lib" / marca),
-             "--python-version", versao, "--only-binary=:all:", "mcp>=1.28"],
+             "--python-version", versao, "--only-binary=:all:", *exigencias],
             capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
         if resultado.returncode != 0:
