@@ -380,6 +380,61 @@ sem a comparação que vinha saindo errada.
 
 ---
 
+## Sétima rodada: as cinco na v1.6.3
+
+| | citações | fora do acervo | frase pronta | checagem de cadeia |
+|---|---|---|---|---|
+| 1 · revogada | 17 | 0 | 4 | — |
+| 2 · alterada | 8 | 0 | 2 | — |
+| 3 · parcial | 21 | **1** | 2 | 4 |
+| 4 · ementa | 10 | 0 | 1 | 2 |
+| 5 · vocabulário | 10 | 0 | 3 | — |
+| | **66** | **1** | **12** | |
+
+A única fora do acervo é, de novo, a LC 1/2002 — a lacuna que a base declara.
+
+### O achado que nenhuma das seis rodadas anteriores tinha feito
+
+A pergunta 2 disse que a alíquota do SFH sobre o valor restante era **1,5%**,
+*"nessa redação desde a LC nº 18, de 11/12/2015"*.
+
+As rodadas 1, 2 e 5 tinham dito **2%**, tratando o "(um e meio por cento)" que
+vem por extenso ao lado como erro material da publicação. Fui conferir a LC
+18/2015:
+
+> *"Art. 1º — … a alínea 'b' do inciso I do art. 41 … da Lei Complementar 17,
+> de 22 de dezembro de 2014 … passa a vigorar com a seguinte redação: 'Art. 41
+> […] I – […] b) sobre o valor restante – **1,5% (um e meio por cento)**'"*
+
+A resposta nova está certa e as anteriores estavam erradas. O texto original de
+2014 realmente traz um algarismo que discorda do extenso — e o Município
+corrigiu isso em 2015, alterando exatamente aquela alínea. Ler o art. 41 no
+texto de 2014 e concluir "2%, com erro de digitação" é a leitura natural, e é a
+leitura que a ferramenta induzia antes de avisar da cadeia.
+
+**A régua pré-2025 do ITBI no SFH era 0,5% sobre o financiado e 1,5% sobre o
+restante.** Isso muda a conta de qualquer repetição de indébito no período —
+para mais.
+
+Nenhuma das seis rodadas anteriores percebeu, incluindo as duas em que eu
+conferi o art. 41 à mão e endossei o "erro de digitação".
+
+### O resto
+
+A pergunta 3 abriu com a frase pronta, acertou os 16 membros da redação de
+2010, notou de novo o sumiço da cláusula 40/60 e foi além: calculou que o poder
+público passou a ter **7 das 15 cadeiras (46,7%)**. Conferido: 5 do Executivo
+mais 2 do Legislativo, e a aritmética fecha.
+
+A pergunta 4 usou a frase pronta e depois **verificou uma a uma** as alterações
+da LC 36/2021 para afirmar que nenhuma tocou o art. 59 — que é exatamente o
+comportamento que o aviso de cadeia pede.
+
+A pergunta 1 usou a frase pronta quatro vezes, para quatro normas diferentes, e
+não repetiu o "de 30 para 15" das rodadas 4 e 5.
+
+---
+
 ## O que este teste continua não cobrindo
 
 Revogação tácita, pelo motivo já registrado. E, agora, uma segunda coisa
