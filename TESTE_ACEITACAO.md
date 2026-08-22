@@ -147,8 +147,20 @@ abrir tudo — que é o que a ferramenta deveria poupar.
 
 **O caso.** A ementa da LC 17/2014 diz apenas *"institui o novo Código
 Tributário do Município"*. A resposta está nos **433 mil caracteres, 45
-páginas** de artigos que vêm depois — no art. 39 e no dispositivo que fixa
-prazo de 30 dias para pagamento ou impugnação.
+páginas** de artigos que vêm depois — no **art. 328**, que dá 30 dias para
+reclamação ou defesa contra a exigência fiscal, "se não constar da intimação ou
+da notificação outro prazo".
+
+> **Gabarito corrigido em 22/08/2026, depois da primeira rodada.** Eu tinha
+> escrito aqui "art. 39 e o dispositivo dos 30 dias". Errado: o art. 39 é a
+> impugnação da base de cálculo do ITBI, e os "30 dias para pagamento ou
+> impugnação" são o art. 169, § 1º, sobre taxa de vistoria de veículos.
+>
+> E há resposta melhor que a minha, que a rodada encontrou: a **LC 36/2021,
+> art. 59** — Código de Defesa do Contribuinte, norma especial e posterior —,
+> com a exceção do § 1º, que dá até **30 de abril** para impugnar o carnê anual
+> de IPTU, taxa de lixo e ISS de autônomo. Quem chegar lá e voltar ao art. 328
+> como cautela respondeu acima do gabarito, não abaixo.
 
 **A armadilha, e ela é real:** medida no acervo, a busca no corpo traz entre os
 primeiros resultados a **Lei Complementar 3/2003, p. 104** — que também fala em
