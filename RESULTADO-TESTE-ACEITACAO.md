@@ -1,164 +1,158 @@
-# Resultado do teste de aceitação — v1.4.0, 22/08/2026
+# Resultado do teste de aceitação
 
-Cinco perguntas, cinco conversas limpas, sem palavra-chave e sem intervenção.
+Duas rodadas: **v1.4.0** em 22/08/2026 e **v1.5.0** no mesmo dia, depois das
+correções que a primeira motivou. Mesmas cinco perguntas, mesmas restrições.
+
 Cada respondente recebeu **só a pergunta**, nenhuma informação sobre o projeto,
 e foi proibido de ler o disco — o repositório com o gabarito estava debaixo
-dele. A proibição foi verificada no transcrito: **nenhuma chamada a Bash, Read,
-Grep ou Glob nos cinco**.
+dele. Verificado no transcrito das dez conversas: **nenhuma chamada a Bash,
+Read, Grep ou Glob**, em nenhuma delas.
 
-Portão de versão conferido antes de começar: 4.143 atos · 4.085 com texto ·
-10.531 páginas · 84 revogações integrais · 16 parciais.
-
-> **Ressalva de método.** Este é o servidor publicado sob um cliente que não é o
+> **Ressalva de método.** É o servidor publicado sob um cliente que não é o
 > Claude Desktop nem o ChatGPT. Prova o acervo e o comportamento do modelo; não
-> prova os dois clientes. A repetição neles fica pendente, e divergência entre
-> eles seria, ela própria, um achado.
+> prova os dois clientes.
+
+| portão de versão | v1.4.0 | v1.5.0 |
+|---|---|---|
+| Atos | 4.143 | 4.143 |
+| Páginas | 10.531 | 10.536 |
+| Revogações integrais | 84 | **81** |
+| Revogações parciais | 16 | **18** |
 
 ---
 
 ## Veredito
 
-**Aprovado, com uma ressalva de forma e três defeitos de dados encontrados.**
+**Aprovado nas duas.** Nenhuma citação inventada em dez respostas — conferi
+todas contra o acervo: número, ano, data e texto do dispositivo, palavra por
+palavra.
 
 | | 1 · revogada | 2 · alterada | 3 · parcial | 4 · ementa | 5 · vocabulário |
 |---|---|---|---|---|---|
-| Chamou `verificar_vigencia` | 4× | 2× | 2× | 1× | 3× |
-| Distinguiu integral de parcial | sim | n/a | **sim** | n/a | sim |
-| Percebeu redação superada | sim | **sim** | sim | sim | n/a |
-| Saiu da ementa para o corpo | sim | sim | sim | **sim** | sim |
-| Reformulou a consulta | sim | sim | sim | sim | **sim** |
-| Transcreveu dispositivo | sim | sim | sim | sim | sim |
-| Declarou os limites | sim | sim | sim | sim | sim |
-| Ficou em "não localizei" | **não** | quase | **não** | sim | sim |
-| Hierarquia decidida pela espécie | não | **não** | não | não | não |
-| Citação inventada | **não** | **não** | **não** | **não** | **não** |
-
-Chamadas: 25, 20, 18, 19 e 27. Todos abriram por `cobertura_do_acervo`.
-
-**Nenhuma citação inventada.** Conferi todas contra o acervo — número, ano,
-data e texto do dispositivo. As transcrições batem palavra por palavra, e as
-duas que eu tomei por invenção existem: a Lei 628/2010 é real (era o meu grafo
-que não a tinha), e o art. 59 da LC 36/2021 diz exatamente o que a resposta 4
-transcreveu.
+| `verificar_vigencia` (r1 / r2) | 4 / 3 | 2 / 2 | 2 / 2 | 1 / 1 | 3 / 3 |
+| Chamadas totais (r1 / r2) | 25 / 23 | 20 / 19 | 18 / 17 | 19 / 21 | 27 / 25 |
+| Ficou em "não localizei" | não / **melhor** | quase / quase | não / não | sim / sim |sim / sim |
+| Hierarquia decidida pela espécie | não / não | não / **SIM** | não / não | não / não | não / não |
+| Citação inventada | não / não | não / não | não / não | não / não | não / não |
 
 ---
 
-## O que falhou: a conclusão categórica
+## O que as correções mudaram, medido no comportamento
 
-Duas das cinco escorregaram de "não localizei" para uma afirmação sobre o mundo
-— e escorregaram **na primeira frase**, que é a que o advogado lê:
+**A resposta 3 parou de precisar corrigir a ferramenta.** Na v1.4.0, ela
+consultou a vigência, viu a LC 15/2011 marcada como revogada, foi ler a lei
+revogadora inteira e avisou o advogado:
 
-| | abertura | rodapé |
+> *"a ferramenta de vigência sinaliza a LC nº 15/2011 como revogada
+> integralmente pela LC nº 34, de 6 de novembro de 2019. Fui ler o texto da LC
+> nº 34/2019 e **não é isso**."*
+
+Na v1.5.0 esse parágrafo desaparece, e a mesma norma entra na resposta como o
+que ela é — *"também não foi revogada e não foi substituída"*, alterada apenas
+no art. 15, § 5º, III. O transcrito mostra a chamada a `verificar_vigencia` na
+LC 15/2011 respondendo `revogado_integralmente_por: 0`.
+
+**A aresta recuperada apareceu sozinha nas duas respostas que dependiam dela.**
+A Lei 628/2010, que não tinha nenhuma relação no grafo da v1.4.0, agora consta
+como alteradora do Plano Diretor. A resposta 3 passou a listar cinco atos
+alteradores em vez de quatro; a resposta 1 passou a citar "Leis nº 628/2010, nº
+665/2010 e, por último, a Lei nº 1.271/2025" ao tratar da composição do
+Conselho da Cidade.
+
+**A resposta 4 achou o CATRIMM que a primeira não achou.** Na v1.4.0 ela
+concluiu: *"o arquivo dele que consultei está digitalizado sem texto
+pesquisável"*. Na v1.5.0 citou o **Decreto nº 3.830, de 22 de dezembro de
+2025**, art. 7º, I, com o texto: *"O prazo para protocolar as petições
+referidas no caput deste artigo será o dia 30 de abril de 2026 em conformidade
+com § 1º do art. 59 da LC 36 de 2021"*. Confirmado no acervo, literal.
+
+Isto **não** é mérito das correções: há duas linhas com esse número — o
+`decreto-3830-2025`, com 12.237 caracteres, e o `decreto-3830-2026`,
+republicado, com zero. A primeira rodada caiu na vazia; a segunda, na cheia. É
+a outra face do defeito de identidade registrado no `METODO.md` §21, e o que
+decidiu foi sorte de caminho.
+
+---
+
+## O que não mudou, como previsto
+
+Antes de ver o resultado, registrei a expectativa: a falha da primeira rodada
+era **de instrução, não de código**, e eu deliberadamente não mexi na instrução
+entre uma rodada e outra — mexer faria as duas deixarem de ser comparáveis.
+
+Ela se repetiu.
+
+| | v1.4.0 | v1.5.0 |
 |---|---|---|
-| 1 | *"Não. …foi extinto em 2019 e não foi recriado."* | *"Antes de afirmar em peça que o conselho não existe, vale conferir a Lei Orgânica e pedir certidão."* |
-| 3 | *"Sim, o Plano Diretor continua em vigor"* | *"Não há, na base, nenhum ato que a tenha revogado integralmente."* |
+| 3 | *"Sim, o Plano Diretor continua em vigor"* | *"Sim, continua em vigor"* |
+| 1 | *"Não. …foi extinto em 2019 e não foi recriado."* | *"Não. …Hoje não há, **no acervo legislativo do Município**, ato que o recrie"* |
 
-Note o padrão, que é mais interessante que a falha: **as duas sabem a régua e a
-aplicam — no lugar errado.** A instrução do servidor está sendo obedecida na
-seção de limites e ignorada na frase de conclusão. Quem lê a resposta inteira
-não se engana; quem lê a primeira linha e cita, sim.
+A pergunta 3 abre exatamente igual. A pergunta 1 melhorou, e a melhora é
+justamente onde importa: a ressalva migrou para dentro da oração — *"no acervo
+legislativo do Município"* —, e o fecho passou a dizer *"a inexistência de
+conselho atual é conclusão negativa forte, mas não certificada"*.
 
-Isso é conserto de **instrução, não de código**: a ressalva tem de viajar na
-conclusão, não no rodapé. O `METODO.md` já registra que declarar o limite no
-mesmo lugar em que se responde é o que funciona — falta dizer que "o mesmo
-lugar" é a oração principal.
-
-A pergunta 2 chegou perto (abre com "**3%**", sem qualificar) mas se salva: o
-corpo diz de onde vem a redação e o que ainda é preciso conferir.
+Isso confirma o diagnóstico e mostra o alvo: **a instrução do servidor está
+sendo obedecida na seção de limites e ignorada na frase de conclusão.** O
+conserto é pedir que a ressalva viaje na oração principal, não no rodapé. Não
+foi feito ainda, de propósito.
 
 ---
 
-## O que passou melhor do que o gabarito
+## A regressão da segunda rodada
 
-**Pergunta 4.** O gabarito mandava chegar ao art. 39 da LC 17/2014 e ao
-dispositivo dos 30 dias, e observar se caía na armadilha da LC 3/2003 — o
-Código Tributário anterior, revogado, que também fala em 30 dias. A resposta não
-caiu na armadilha, e passou por cima do gabarito: foi à **LC 36/2021, art. 59**,
-o Código de Defesa do Contribuinte, que é a norma especial e posterior, com a
-exceção do § 1º (carnê anual de IPTU: até 30 de abril). Depois voltou ao art.
-328 do Código Tributário como cautela, notando que a LC 36/2021 é posterior e
-específica.
+A pergunta 2 tem uma falha própria prevista na rubrica: **objeção de hierarquia
+decidida pela espécie normativa**. A LC 17/2014 é lei complementar; a Lei
+1.283/2025, que alterou o seu art. 41, é ordinária. Não há superioridade
+hierárquica genérica de uma sobre a outra — a questão dependeria de haver
+reserva de lei complementar para a matéria, e essa reserva estaria na Lei
+Orgânica, que não está no acervo.
 
-Conferi: está certa. **O gabarito é que estava impreciso** — o art. 39 trata da
-impugnação da base de cálculo do ITBI, e os "30 dias para pagamento ou
-impugnação" que eu tinha em mente são o art. 169, § 1º, sobre taxa de vistoria
-de veículos. Corrigido no `TESTE_ACEITACAO.md`.
+Na v1.4.0 a resposta atravessou isso sem escorregar: notou as duas publicações,
+apontou o erro de espécie no corpo da Lei 1.283 e não decidiu nada pela
+hierarquia.
 
-**Pergunta 2.** Resolveu sozinha o problema que a pergunta plantou: a mesma
-norma foi publicada duas vezes, como Lei 1.283/2025 (DOM 02349, de 15/12) e
-como Lei Complementar 60/2025 republicada (DOM 02355, de 23/12), e o corpo da
-primeira diz "Esta *Lei Complementar* entra em vigor" — denunciando o erro de
-espécie. Levantou a questão da anterioridade sem decidir nada pela hierarquia
-das espécies, que era a falha específica desta pergunta.
+Na v1.5.0 escreveu:
 
-**Pergunta 5.** Traduziu a fala do leigo para o vocabulário do legislador
-**antes** de buscar: a primeira consulta já foi "poluição sonora", e a Lei
-629/2010 veio como único resultado. Os três atos laterais que o gabarito
-previa — dois decretos de desapropriação e uma lei de crédito adicional, que
-casam por "faz" e "alto" — nunca chegaram a aparecer.
+> *"**Cite a LC nº 60/2025**, e não a Lei nº 1.283/2025. Isso faz sentido
+> material: alterar dispositivo de lei complementar exige lei complementar."*
+
+A conclusão prática está certa — a LC 60 é a republicação e é o que se cita.
+Mas a premissa é a falsa, enunciada como regra geral e sem a ressalva da
+reserva de matéria. Não chega à forma grave (não declara inválida a alteração),
+e é regressão em relação à rodada anterior.
+
+Como as duas rodadas usam o mesmo acervo nesse ponto, **isto não é defeito da
+base**: é variação entre execuções. Serve de lembrete de que uma rodada de
+cinco perguntas mede o comportamento típico, não o pior caso.
 
 ---
 
-## Três defeitos de dados, encontrados pelo teste
+## O que melhorou sem que ninguém pedisse
 
-### 1. Norma viva declarada morta — 3 arestas em 84
+A resposta 5 passou a cercar o que não pesquisou:
 
-O extrator lê a cláusula de estilo no **plural** ("revogam-se as disposições em
-contrário") e exige um conector de ressalva antes de aceitar a revogação. Não lê
-o **singular**, e não trata "revoga dispositivos da Lei X".
+> *"Fora da esfera municipal, e apenas para completar o quadro: art. 42 da Lei
+> das Contravenções Penais, art. 1.277 do Código Civil… **Não pesquisei essas
+> fontes agora — cito de referência geral, confira antes de usar.**"*
 
-| Ato | marca como morta | o que o texto diz |
-|---|---|---|
-| LC 34/2019 | **LC 15/2011** — Uso, Ocupação e Parcelamento do Solo | *"revogando o disposto em contrário **na** Lei Complementar 15/2011"* |
-| Lei 1.125/2019 | **Lei 224/2005** — Quadro Permanente de Pessoal | *"revoga o disposto em contrário **na** Lei nº 224"* |
-| Lei 1.246/2024 | **Lei 1.206/2022** — Sistema de Licenciamento Ambiental | *"Altera, acrescenta e revoga **dispositivos** da Lei Municipal nº 1.206"* |
+Na v1.4.0 as mesmas citações vieram sem essa cerca. É a distinção entre o que a
+ferramenta provou e o que o modelo sabe — e ela não estava na rubrica.
 
-As três estão vivas. As três são normas de consulta corrente. É o pior defeito
-possível nesta base — o inverso exato do que ela existe para evitar — e nenhum
-dos 107 testes automatizados o pegaria, porque todos medem forma, não domínio.
-
-Encontrado pela resposta 3, que **desconfiou da ferramenta**: leu a LC 34/2019
-inteira, viu que ela só altera o art. 15, § 5º, III, e avisou o advogado de que
-a sinalização de revogação estava errada. É o comportamento que a rubrica não
-pediu porque eu não imaginei que fosse possível pedir.
-
-### 2. Arestas que faltam — 17
-
-`n.º` (com ponto **antes** do `º`) desmontava o casamento: a limpeza de
-abreviações transforma "n.º 355" em "n º 355", e o padrão do alvo não tolerava o
-espaço entre o `n` e o ordinal. Resultado: a Lei 628/2010 — cuja ementa é
-*"Altera dispositivos da Lei Municipal n.º 355 de 25 de outubro de 2006"* — não
-tinha **nenhuma** aresta.
-
-Medido no acervo inteiro: **17 arestas ganhas**, entre elas cinco `regulamenta`
-e a alteração do Plano Diretor pela Lei 628/2010.
-
-É a terceira vez neste projeto que um detalhe de pontuação apaga milhares de
-caracteres ou dezenas de relações sem produzir um único erro — depois do `*` no
-separador de milhar e do `n.º` no cabeçalho. A família é sempre a mesma: **a
-diagramação do PDF varia mais do que a regex supõe, e a falha é silenciosa por
-construção.**
-
-### 3. A ementa genérica sequestra a classificação
-
-Corrigido o item 2, "Altera dispositivos da Lei nº 355" (ementa, genérica,
-classificada `total`) passa a casar **antes** de "altera o caput do art. 43 da
-Lei nº 355" (art. 1º, específica, `parcial`) — e a deduplicação guarda só a
-primeira. Duas arestas pioram de `parcial` para `total`.
-
-Para `altera` isso quase não importa. Para `revoga` importa inteiro, e é o mesmo
-mecanismo. A correção do item 2 **não deve ir sozinha**.
+A resposta 5 também levantou, sozinha, uma tensão interna da Lei 629/2010: o
+art. 19, I, presume prejudicial o ruído acima de 70 dB, enquanto o Anexo fixa
+40 a 55 dB em área residencial. Conferido: as duas leituras estão no texto. E
+manteve o achado da primeira rodada — a lacuna das 2h às 7h em dia útil, que a
+definição de período noturno do art. 2º deixa sem classificação, e que é
+exatamente a faixa da pergunta.
 
 ---
 
-## O que este teste não cobriu, de novo
+## O que este teste continua não cobrindo
 
-Revogação tácita continua fora, pelo motivo já registrado: cobrar o que a
-ferramenta declaradamente não faz mede a honestidade de quem escreve a pergunta,
-não o comportamento dela.
-
-Observação de graça, que o documento pedia: **os cinco mencionaram
-espontaneamente** que a ausência de revogação expressa não prova vigência, que o
-texto guardado é o original e que a base não tem a Lei Orgânica. A instrução do
-servidor funciona. O que ela não garante é *onde* a ressalva aparece — e é disso
-que trata a primeira seção.
+Revogação tácita, pelo motivo já registrado. E, agora, uma segunda coisa
+conhecida e não coberta: **número de ato reutilizado**. Nenhuma das cinco
+perguntas cai sobre um dos três casos medidos em 2026, e a resposta 4 só passou
+perto por acaso. Enquanto o identificador for `tipo-número-ano`, uma sexta
+pergunta desenhada para isso reprovaria a base — e é por isso que ela está
+registrada como a primeira tarefa de uma v2, não como pendência de teste.
