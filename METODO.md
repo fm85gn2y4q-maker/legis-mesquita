@@ -754,16 +754,28 @@ atinge — assim a ferramenta poderia dizer "o art. 128 já foi mexido em 2010".
 Escrevi o extrator e o medi contra oito atos cujo alvo eu conhecia:
 
 ```
-Lei 628/2010    extraiu [119, 128, 132]   correto: 119, 128, 130
+Lei 628/2010    extraiu [119, 128, 132]   correto: 119, 128, 130, 132
 LC 47/2023      extraiu [20]              correto: 20 a 23
 LC 52/2024      misturou artigos da LC 36 com artigos do Código Tributário
 ```
 
-Inventou um artigo, perdeu outro, e leu "arts. 20 a 23" como só o 20. **Não
-publiquei.** Número de artigo errado é precisamente o erro de aparência
-impecável contra o qual esta base inteira foi construída, e uma etiqueta
-dizendo "extraído automaticamente, pode estar incompleto" não protege contra
-uma entrada *errada* — só contra as que faltam.
+> **Correção, no dia seguinte à medição.** Escrevi aqui que o extrator "inventou
+> o art. 132". Não inventou: o art. 5º da Lei 628/2010 dá nova redação ao art.
+> 132, e quem estava errado era o meu gabarito, montado a partir de uma
+> listagem que eu havia truncado nos seis primeiros achados. O extrator **só
+> omite** nesses dois primeiros casos.
+>
+> Isso é sintomático, e por isso fica registrado em vez de ser apagado: eu
+> construí um gabarito a partir de uma amostra e o tratei como verdade. É o
+> mesmo defeito que o teste de aceitação existe para pegar, cometido por mim
+> enquanto eu documentava o teste de aceitação.
+
+O motivo para não publicar continua de pé, mas é **um só**, não três: na LC
+52/2024 o extrator atribuiu à Lei Complementar nº 36 artigos que eram do Código
+Tributário. Isso não é omissão, é atribuição errada — o erro de aparência
+impecável contra o qual esta base inteira foi construída. Uma etiqueta dizendo
+"extraído automaticamente, pode estar incompleto" protege contra o que falta,
+nunca contra o que está trocado.
 
 O que foi publicado é o aviso que não depende de extração nenhuma, e por isso é
 verdadeiro por construção:

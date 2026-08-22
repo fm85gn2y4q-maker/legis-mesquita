@@ -215,10 +215,26 @@ comparou com a de 2006. A ferramenta entrega frase pronta para *vigência*; não
 entrega nada equivalente para *"a redação que você está tomando por base também
 já mudou"*.
 
-Isso também corrige o achado da rodada anterior. O quórum do art. 130, § 1º —
-16 conselheiros — não era impossível desde sempre: ele **casava exatamente**
-com os 16 membros da redação de 2010, e ficou impossível em 2025, quando a
-composição caiu para 15 sem que o quórum fosse ajustado.
+### E o achado do quórum, que eu dei por bom duas vezes, era falso
+
+Escrevi aqui — e disse ao advogado — que o art. 130, § 1º da Lei 355/2006 exige
+quórum mínimo de 16 conselheiros, e que a redução a 15 pela Lei 1.271/2025
+tornara a instalação do Conselho aritmeticamente impossível.
+
+**Não é verdade.** O art. 4º da Lei 628/2010 deu nova redação àquele parágrafo:
+*"o quorum mínimo para a realização de reuniões do Conselho da Cidade é de 9
+(nove) conselheiros"*. O mesmo ato levou o art. 132 de "24 membros presentes"
+para "2/3 de seus membros". Com 15 membros e quórum de 9, não há impossibilidade
+nenhuma.
+
+Os 16 que eu li são a redação **original**, de 2006 — e eu a li sem verificar se
+havia sido alterada, que é exatamente o erro que esta seção inteira documenta.
+Cometi-o enquanto o media nas respostas, e o repeti duas vezes antes de a
+ferramenta corrigida me mostrar a redação de 2010.
+
+É o argumento mais forte que eu tenho para o aviso da v1.6.3 existir: o defeito
+não é de quem responde, é da forma como o acervo entrega a informação. Ele pega
+quem construiu a base.
 
 ---
 
@@ -328,6 +344,39 @@ entrega **frase pronta** e a cadeia de redações não entrega nada: o grafo diz
 É a mesma lição do §23 do `METODO.md`, ainda por aplicar: enquanto for preciso
 o modelo compor a comparação, ele vai compor com o texto que tem na mão — que é
 sempre o original.
+
+---
+
+## Sexta rodada: o aviso de cadeia funcionou
+
+Perguntas 1 e 3 na v1.6.3, que acrescentou `ANTES_DE_COMPARAR_REDACOES` —
+o aviso de que o texto guardado é o original e de que há redações no meio.
+
+A pergunta 3 não só evitou o erro como o explicou ao advogado:
+
+> *"o art. 128 **já havia sido alterado antes**, pela Lei nº 628/2010, que o
+> fixara em **16 membros** com proporção expressa de 40% para o Poder Público e
+> 60% para a sociedade civil. A redação de 2025 substitui aquela — não a de
+> 2006 — e **não reproduz a cláusula de proporção 40/60**. Comparar o texto de
+> 2025 direto com o original de 2006, saltando 2010, produz conclusão errada
+> com cara de correta."*
+
+Foi além do que o aviso pedia. O aviso manda conferir os anteriores; ela
+conferiu, achou os 16, e ainda percebeu que a cláusula de proporção
+desapareceu na redação nova — que é um achado jurídico, não uma checagem.
+
+A tabela dela lista, para a Lei 628/2010: "Arts. 119, 128 (caput e §§ 1º e 4º),
+130, § 1º, e 132". Conferido no texto: exato, artigo por artigo.
+
+A pergunta 1 abriu com a frase pronta e **não repetiu** o "de 30 para 15" das
+duas rodadas anteriores — disse apenas "reduziu o colegiado a 15 membros",
+sem a comparação que vinha saindo errada.
+
+| | v1.4.0 | v1.5.0 | v1.6.1 | v1.6.2 | v1.6.3 |
+|---|---|---|---|---|---|
+| 1 · abertura | categórica | categórica | categórica ("hoje") | frase pronta | frase pronta |
+| 3 · abertura | categórica | categórica | categórica | frase pronta | frase pronta |
+| comparação com redação superada | — | — | — | **erro** | **correta** |
 
 ---
 
