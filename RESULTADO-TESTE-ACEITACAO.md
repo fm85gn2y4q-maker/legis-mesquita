@@ -23,9 +23,10 @@ Read, Grep ou Glob**, em nenhuma delas.
 
 ## Veredito
 
-**Aprovado nas duas.** Nenhuma citação inventada em dez respostas — conferi
-todas contra o acervo: número, ano, data e texto do dispositivo, palavra por
-palavra.
+**Aprovado nas duas.** Nenhuma citação inventada em dez respostas. Conferi as
+decisivas à mão — número, ano, data e texto do dispositivo, palavra por palavra —
+e depois **todas** por programa: 127 ocorrências, uma única apontando para um ato
+ausente do acervo, e essa por culpa da base, não da resposta (veja adiante).
 
 | | 1 · revogada | 2 · alterada | 3 · parcial | 4 · ementa | 5 · vocabulário |
 |---|---|---|---|---|---|
@@ -34,6 +35,74 @@ palavra.
 | Ficou em "não localizei" | não / **melhor** | quase / quase | não / não | sim / sim |sim / sim |
 | Hierarquia decidida pela espécie | não / não | não / **SIM** | não / não | não / não | não / não |
 | Citação inventada | não / não | não / não | não / não | não / não | não / não |
+
+---
+
+## Conferência mecânica das citações
+
+A primeira versão deste documento afirmava "nenhuma citação inventada" com base
+em amostragem — eu conferi as que me pareceram arriscadas. Refeito por
+programa, sobre o texto das dez respostas, sem escolher quais olhar:
+
+| | v1.4.0 | v1.5.0 |
+|---|---|---|
+| Ocorrências de citação conferidas | 66 | 61 |
+| Atos municipais distintos citados | 35 | 38 |
+| **Citando ato ausente do acervo** | **1** | **1** |
+
+**127 ocorrências conferidas, uma única apontando para fora do acervo** — e a
+mesma nas duas rodadas.
+
+O diff por pergunta mostra a correção operando onde ela devia operar:
+
+| | só na v1.4.0 | só na v1.5.0 |
+|---|---|---|
+| 1 | Lei 665/2010 | — |
+| 2 | — | — |
+| 3 | LC 2/2002 | **Lei 628/2010**, Lei 1.200/2022, Lei 1.238/2024, Lei 1.251/2024 |
+| 4 | — | Decreto 3.830/2025, Lei 1.052/2017 |
+| 5 | Decretos 874/2010 e 2.341/2018 | Lei 1.153/2020 |
+
+A Lei 628/2010 aparecendo na pergunta 3 **só** na segunda rodada é a aresta
+recuperada, medida sem depender da minha leitura.
+
+---
+
+## A citação que aponta para fora — e o que ela revelou
+
+Nas duas rodadas, a pergunta 3 cita a **Lei Complementar nº 1/2002, o Código de
+Obras**, ao explicar que o art. 100 da Lei 355/2006 revogou os seus arts. 15 a
+18. A citação é fiel: o texto do art. 100 diz exatamente isso, e está no
+acervo.
+
+Só que **a LC 1/2002 não está**. Não há um único ato com "Código de Obras" na
+ementa, e a série de leis complementares começa no número 2.
+
+As respostas não erraram — citaram o que a norma que leram manda citar. Quem
+erra é a base, que **não declara essa ausência**. O relatório de lacunas do
+`cobertura_do_acervo` lista *anos* vazios; um número faltando dentro de um ano
+presente é invisível para ele. E este caso é o pior possível para qualquer
+detector: a LC 1/2002 é o **primeiro** número da série, e nenhuma varredura
+entre mínimo e máximo pode enxergar um buraco antes do mínimo.
+
+Medindo os buracos de numeração, que é a conta que ninguém tinha feito:
+
+| | números presentes | faltam na série | |
+|---|---|---|---|
+| Leis Complementares | 60 (de 2 a 61) | 0 | mais a de nº 1, invisível |
+| Leis | 1.194 (de 1 a 1.291) | **97** (7,5%) | maior bloco: 981–1035 |
+| Decretos | 2.841 (de 1 a 3.930) | **1.089** (27,7%) | maior bloco: 1002–1395 |
+
+Mais de um quarto da série de decretos não está no acervo. Isso é compatível
+com o que o `cobertura_do_acervo` já diz — *"a ausência de um ato aqui NÃO
+significa que ele não exista"* — mas a frase é qualitativa e o número não
+estava em lugar nenhum. **Um advogado que perguntasse sobre obras e
+licenciamento receberia o Plano Diretor e o Código de Posturas, e nunca saberia
+que o Código de Obras existe e não foi consultado.**
+
+Fica como achado desta rodada, não corrigido: declarar os buracos de numeração
+é mudança em `cobertura_do_acervo`, e vale decidir com calma se o número certo
+a publicar é esse ou o de atos que o portal lista e o acervo não tem.
 
 ---
 
