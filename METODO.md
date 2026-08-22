@@ -648,6 +648,57 @@ ferramentas. Fica registrado, medido, e é a primeira coisa a resolver numa v2.
 
 ---
 
+## 22. Duas contas para "o que falta", e uma delas é a errada
+
+A conferência mecânica das citações do teste de aceitação — 127 ocorrências nas
+dez respostas — encontrou exatamente uma apontando para fora do acervo: a
+**Lei Complementar nº 1/2002, o Código de Obras**, citada porque o art. 100 da
+Lei 355/2006 revoga os seus arts. 15 a 18.
+
+A resposta estava certa. A base é que não avisava.
+
+Ao medir o buraco, quase publiquei o número errado. A primeira conta que fiz
+foi a dos **números que faltam na série**: 97 leis e 1.089 decretos, 27,7% da
+série de decretos. É um número grande, verdadeiro e **imprestável para
+orientar** — ninguém sabe se aqueles decretos existem, e o advogado que o
+lesse concluiria que a coleta falhou.
+
+A segunda conta é a que responde à pergunta: **quanto do que a fonte publica
+chegou até aqui.** Medida contra o catálogo do Portal da Transparência:
+
+```
+catalogados pelo portal      4.074
+desses, ausentes do acervo       0
+achados só no Diário Oficial    69
+```
+
+Zero. O acervo tem tudo o que a fonte publica, e ainda 69 atos que a fonte não
+cataloga. Os 1.089 decretos faltam **na fonte**, não na coleta — e o Código de
+Obras também: o portal não o publica.
+
+As duas foram para o `cobertura_do_acervo`, porque separadas elas dizem coisas
+diferentes e juntas dizem a verdade inteira: *o limite é a transparência do
+Município, não a nossa coleta.* Publicar só a primeira teria acusado o próprio
+trabalho; publicar só a segunda teria dito que não falta nada.
+
+> Antes de publicar um número sobre uma falha, pergunte o que o leitor vai
+> decidir com ele. "Faltam 1.089 decretos" e "temos 4.074 de 4.074" descrevem
+> o mesmo acervo e levam a decisões opostas.
+
+### E o caso que nenhuma das duas pega
+
+A LC 1/2002 é o **primeiro** número da série de leis complementares, que no
+acervo começa em 2. Buraco só se mede entre o primeiro e o último existentes —
+uma ausência antes do mínimo é invisível por construção. Por isso
+`buracos_na_numeracao` declara `primeiro_numero`, e por isso o Código de Obras
+está nomeado, com todas as letras, entre os `limites_do_acervo`: em matéria de
+obras e licenciamento, o silêncio desta base não significa nada.
+
+> Toda métrica de completude tem uma borda que ela não enxerga. Vale procurar
+> qual é a sua e declará-la ao lado do número — senão o número vira promessa.
+
+---
+
 ## O que eu repetiria em outra base
 
 1. Medir o pressuposto antes da primeira linha — aqui, se havia texto extraível.

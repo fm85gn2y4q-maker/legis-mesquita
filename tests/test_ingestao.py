@@ -646,3 +646,53 @@ def test_integralidade_expressa_vence_a_mencao_a_artigo():
         "Art. 2º Fica revogada na íntegra a Lei nº 828 de 1 de janeiro de 2012."
     )
     assert [(a[0], a[2], a[4]) for a in achados] == [("revoga", 828, "total")]
+
+
+def test_buracos_na_numeracao_medem_a_serie_e_nao_os_anos():
+    """A conta que o relatório de lacunas por ano não faz.
+
+    Um número faltando dentro de um ano presente é invisível para a lacuna por
+    ano. Foi assim que o Código de Obras passou despercebido — e ele é o caso
+    que nem esta conta pega, porque é o primeiro número da série. Por isso
+    `primeiro_numero` vai declarado.
+    """
+    import sqlite3
+
+    from legis.ingestao import ESQUEMA, buracos_na_numeracao
+
+    conexao = sqlite3.connect(":memory:")
+    conexao.executescript(ESQUEMA)
+    for numero in (2, 3, 7, 8, 9, 15):
+        conexao.execute(
+            "INSERT INTO atos (id, tipo, numero, ano, situacao) VALUES (?,?,?,?,?)",
+            (f"lei_complementar-{numero}-2002", "lei_complementar", numero,
+             2002, "ok"))
+
+    (medida,) = [b for b in buracos_na_numeracao(conexao)
+                 if b["tipo"].startswith("Lei Complementar")]
+    assert medida["primeiro_numero"] == 2, "a série começa em 2 — o nº 1 falta e não aparece"
+    assert medida["numeros_presentes"] == 6
+    assert medida["numeros_ausentes"] == 8          # 4,5,6 + 10..14
+    assert medida["maiores_blocos_ausentes"][0] == "10–14"
+
+
+def test_cobertura_do_catalogo_aceita_lei_complementar_catalogada_como_lei():
+    """O portal cataloga Lei Complementar como "Lei".
+
+    Comparar as chaves cruas acusaria ausente toda lei complementar do acervo —
+    e o número publicado diria que a coleta falhou quando ela não falhou.
+    """
+    import sqlite3
+
+    from legis.ingestao import ESQUEMA, cobertura_do_catalogo
+
+    conexao = sqlite3.connect(":memory:")
+    conexao.executescript(ESQUEMA)
+    conexao.execute(
+        "INSERT INTO atos (id, tipo, numero, ano, situacao) VALUES (?,?,?,?,?)",
+        ("lei_complementar-17-2014", "lei_complementar", 17, 2014, "ok"))
+
+    medida = cobertura_do_catalogo(conexao, {("lei", 17, 2014): {}, ("lei", 99, 2014): {}})
+    assert medida["catalogados_pelo_portal"] == 2
+    assert medida["ausentes_do_acervo"] == 1
+    assert medida["quais"] == ["Lei 99/2014"]

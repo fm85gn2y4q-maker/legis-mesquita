@@ -538,6 +538,8 @@ class Acervo:
                     "atos_com_revogacao_parcial"),
             },
             "lacunas_conhecidas": resumo.get("lacunas"),
+            "cobertura_do_catalogo": resumo.get("cobertura_do_catalogo"),
+            "buracos_na_numeracao": resumo.get("buracos_na_numeracao"),
             "limites_do_acervo": [
                 "Este acervo é uma CÓPIA de trabalho do que o Portal da "
                 "Transparência publicou, não o repositório oficial. Antes de "
@@ -548,6 +550,22 @@ class Acervo:
                 "Há anos sem nenhum decreto e anos com pouquíssimos — veja "
                 "`lacunas_conhecidas`. A ausência de um ato aqui NÃO significa que "
                 "ele não exista.",
+                "Duas medidas diferentes dizem o tamanho do que falta, e não se "
+                "confundem. `cobertura_do_catalogo` mede o acervo contra a sua "
+                "fonte: quantos dos atos que o Portal da Transparência cataloga "
+                "chegaram até aqui. `buracos_na_numeracao` mede o acervo contra a "
+                "série do próprio Município: quantos números não existem em lugar "
+                "nenhum ao alcance desta base — nem aqui, nem no portal. O segundo "
+                "número é muito maior que o primeiro, e o motivo é a fonte, não a "
+                "coleta.",
+                "Norma importante pode faltar sem aparecer em nenhuma das duas "
+                "contas. O Código de Obras do Município é a Lei Complementar nº 1, "
+                "de 2002, citada pelo art. 100 da Lei nº 355/2006 — e não está "
+                "neste acervo nem no catálogo do portal. Por ser o PRIMEIRO número "
+                "da série, também não conta como buraco, que só se mede entre o "
+                "primeiro e o último existentes. Em matéria de obras, "
+                "licenciamento e habite-se, NÃO conclua a partir do silêncio desta "
+                "base: diga ao advogado que o Código de Obras está fora dela.",
                 "Não estão no acervo: a Lei Orgânica do Município, portarias, "
                 "resoluções, instruções normativas e atos da Câmara Municipal.",
                 "Alguns PDFs são digitalizações sem texto; esses atos constam com "

@@ -26,7 +26,7 @@ revogações **parciais** separado do de integrais — campo que só existe nest
 versão. Não vindo, remova e recrie o conector (ou reinstale a extensão) antes
 de rodar qualquer coisa.
 
-Os números da versão `v1.5.0`, conferidos contra o artefato publicado:
+Os números da versão `v1.6.0`, conferidos contra o artefato publicado:
 
 | | |
 |---|---|

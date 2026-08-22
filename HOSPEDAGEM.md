@@ -48,9 +48,9 @@ winget install --id Cloudflare.cloudflared
 
 | | |
 |---|---|
-| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.5.0` |
-| Acervo | `acervo/legislacao-mesquita-v1.5.0.db.gz` — **21,1 MB**, versionado no repositório |
-| sha256 | `09ab7e550672ea43a1b58869bcd5626d9c8944398f259277a5eedc4087f22abc` |
+| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.6.0` |
+| Acervo | `acervo/legislacao-mesquita-v1.6.0.db.gz` — **21,1 MB**, versionado no repositório |
+| sha256 | `e93004b5664809b9d3f6099836a93806a076cb373d458871094e23bc3d14987c` |
 | `Dockerfile` | descomprime o acervo do repositório, conferindo o hash |
 | `render.yaml` | pronto, sem `healthCheckPath` (veja o porquê no próprio arquivo) |
 
@@ -180,10 +180,10 @@ copy dados\staging.sqlite dados\mesquita.sqlite
 ```
 
 ```bash
-python preparar_release.py 1.6.0
+python preparar_release.py 1.7.0
 ```
 
-Gera `dist/legislacao-mesquita-v1.6.0.db.gz` e imprime o sha256. Então:
+Gera `dist/legislacao-mesquita-v1.7.0.db.gz` e imprime o sha256. Então:
 
 1. mova o `.gz` para `acervo/`. **Apague o anterior só depois que o novo tiver
    passado** — senão cada versão fica somando ~23 MB à imagem, mas apagar antes

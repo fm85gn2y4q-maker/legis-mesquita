@@ -1042,7 +1042,7 @@ def construir(pasta: Path, banco: Path, limite: int | None = None,
     print("montando os índices de busca…", flush=True)
     conexao.executescript(INDICES)
 
-    resumo = estatisticas(conexao) | {"leitura": contagem}
+    resumo = estatisticas(conexao, catalogo) | {"leitura": contagem}
     conexao.execute(
         "INSERT OR REPLACE INTO acervo_info VALUES ('resumo', ?)",
         (json.dumps(resumo, ensure_ascii=False),),
@@ -1092,7 +1092,58 @@ def resolver_referencias(conexao: sqlite3.Connection) -> None:
     print(f"referências resolvidas: {len(atualizacoes)}", flush=True)
 
 
-def estatisticas(conexao: sqlite3.Connection) -> dict:
+def buracos_na_numeracao(conexao: sqlite3.Connection) -> list[dict]:
+    """Números que faltam dentro de cada série, com os maiores blocos contíguos.
+
+    O relatório de lacunas ao lado deste mede ANOS vazios. Isso não enxerga um
+    número faltando dentro de um ano presente — e foi assim que o Código de
+    Obras (LC 1/2002) passou despercebido até o teste de aceitação de
+    22/08/2026, quando duas respostas o citaram por causa do art. 100 da Lei
+    355/2006, que revoga os seus arts. 15 a 18.
+
+    A LC 1/2002 é, aliás, o caso que nem esta conta pega: ela é o PRIMEIRO
+    número da série, e uma varredura entre mínimo e máximo não enxerga buraco
+    antes do mínimo. Por isso `primeiro_numero` vai declarado — quem lê decide
+    se a série deveria começar em 1.
+
+    Estes números NÃO são atos que o acervo perdeu: o portal também não os
+    publica (veja `cobertura_do_catalogo`, que mede a distância entre o acervo
+    e a sua fonte). São atos que existem no mundo e não estão em lugar nenhum
+    ao alcance desta base.
+    """
+    saida = []
+    for tipo in ("lei", "lei_complementar", "decreto"):
+        numeros = sorted(n for (n,) in conexao.execute(
+            "SELECT DISTINCT numero FROM atos WHERE tipo = ?", (tipo,)))
+        if len(numeros) < 2:
+            continue
+        faltam = sorted(set(range(numeros[0], numeros[-1] + 1)) - set(numeros))
+
+        blocos, inicio, anterior = [], None, None
+        for n in faltam:
+            if inicio is None or n != anterior + 1:
+                if inicio is not None:
+                    blocos.append((inicio, anterior))
+                inicio = n
+            anterior = n
+        if inicio is not None:
+            blocos.append((inicio, anterior))
+        maiores = sorted(blocos, key=lambda b: b[0] - b[1])[:3]
+
+        saida.append({
+            "tipo": ROTULOS[tipo],
+            "primeiro_numero": numeros[0],
+            "ultimo_numero": numeros[-1],
+            "numeros_presentes": len(numeros),
+            "numeros_ausentes": len(faltam),
+            "maiores_blocos_ausentes": [f"{a}–{b}" if a != b else str(a)
+                                        for a, b in maiores],
+        })
+    return saida
+
+
+def estatisticas(conexao: sqlite3.Connection,
+                 catalogo: dict[tuple[str, int, int], dict] | None = None) -> dict:
     def um(sql: str, *p):
         return conexao.execute(sql, p).fetchone()[0]
 
@@ -1136,6 +1187,49 @@ def estatisticas(conexao: sqlite3.Connection) -> dict:
             "SELECT COUNT(DISTINCT alvo_id) FROM referencias "
             "WHERE relacao='revoga' AND esfera='municipal' AND extensao='parcial'"),
         "lacunas": lacunas,
+        "buracos_na_numeracao": buracos_na_numeracao(conexao),
+        "cobertura_do_catalogo": cobertura_do_catalogo(conexao, catalogo),
+    }
+
+
+def cobertura_do_catalogo(
+    conexao: sqlite3.Connection,
+    catalogo: dict[tuple[str, int, int], dict] | None,
+) -> dict | None:
+    """Quanto do que o portal cataloga chegou ao acervo.
+
+    É a medida que responde à pergunta certa. "Faltam 1.089 decretos na série"
+    assusta e não orienta: ninguém sabe se eles existem. "O acervo tem 4.074 de
+    4.074 atos catalogados pelo portal" diz onde está o limite — e, medido em
+    22/08/2026, o limite não é a coleta, é a fonte.
+
+    Vai para o banco na ingestão porque o catálogo mora em disco, nos
+    relatórios de download, e o servidor publicado só tem o SQLite.
+    """
+    if catalogo is None:
+        return None
+
+    presentes = {(t, n, a) for t, n, a in conexao.execute(
+        "SELECT tipo, numero, ano FROM atos")}
+
+    def atendida(chave):
+        tipo, numero, ano = chave
+        # O portal cataloga Lei Complementar como "Lei": a chave do catálogo é
+        # satisfeita por qualquer das duas espécies.
+        return (chave in presentes
+                or ("lei", numero, ano) in presentes
+                or ("lei_complementar", numero, ano) in presentes)
+
+    ausentes = sorted(k for k in catalogo if not atendida(k))
+    so_no_diario = sum(
+        1 for k in presentes
+        if k not in catalogo and ("lei", k[1], k[2]) not in catalogo)
+
+    return {
+        "catalogados_pelo_portal": len(catalogo),
+        "ausentes_do_acervo": len(ausentes),
+        "quais": [f"{ROTULOS.get(t, t)} {n}/{a}" for t, n, a in ausentes[:50]],
+        "so_no_diario_oficial": so_no_diario,
     }
 
 

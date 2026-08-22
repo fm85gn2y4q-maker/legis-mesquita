@@ -42,6 +42,27 @@ inconstitucionalidade estão fora do alcance de qualquer base montada assim.
 | Atos com revogação integral expressa | 81 |
 | Atos com revogação parcial expressa | 18 |
 
+Duas medidas dizem o tamanho do que falta, e não se confundem:
+
+| | |
+|---|---|
+| Catalogados pelo portal | 4.074 |
+| Desses, ausentes do acervo | **0** |
+| Achados só no Diário Oficial, fora do catálogo | 69 |
+| Números que faltam na série de Leis | 97 (de 1 a 1.291) |
+| Números que faltam na série de Decretos | **1.089** (de 1 a 3.930) |
+
+O acervo tem **tudo** o que o Portal da Transparência cataloga. Os 1.089
+decretos que faltam na série faltam na fonte: o Município não os publicou.
+O limite é a transparência do Município, não a coleta.
+
+E há norma importante que escapa das duas contas. O **Código de Obras** é a Lei
+Complementar nº 1, de 2002 — citada pelo art. 100 da Lei 355/2006, ausente
+deste acervo *e* do catálogo do portal. Por ser o primeiro número da série,
+também não conta como buraco, que só se mede entre o primeiro e o último
+existentes. Em matéria de obras e licenciamento, o silêncio desta base não
+significa nada.
+
 O acervo se mantém em dia pelo Diário Oficial: `python -m legis.ingestao` lê,
 além dos PDFs por ato, as edições do DOM a partir de `--desde`.
 
@@ -81,7 +102,7 @@ Get-ScheduledTask -TaskName "Legislacao Mesquita - atualizacao semanal"
 Para comparar dois acervos quaisquer, fora da rotina:
 
 ```bash
-python -m legis.comparar acervo/legislacao-mesquita-v1.5.0.db.gz dados/mesquita.sqlite
+python -m legis.comparar acervo/legislacao-mesquita-v1.6.0.db.gz dados/mesquita.sqlite
 ```
 
 Construído a partir de 7.763 PDFs (3.964 distintos por hash), 3,6 GB.
@@ -104,7 +125,7 @@ entravam como se fossem atos do Município.
 | `localizar_norma` | pela referência em mãos: "Lei 1.106/2019" |
 | `ler_texto` | lê o ato página a página |
 | `obter_ato`, `listar_atos` | acesso direto e varredura |
-| `cobertura_do_acervo` | volumes, período, lacunas e limites |
+| `cobertura_do_acervo` | volumes, período, lacunas, **o que falta medido de duas formas** e limites |
 | `search` / `fetch` | compatibilidade com a pesquisa profunda do ChatGPT |
 
 ---
@@ -165,7 +186,7 @@ vez de subir acervo diferente do testado.
 Para gerar a versão comprimida de um acervo recém-coletado:
 
 ```bash
-python preparar_release.py 1.6.0
+python preparar_release.py 1.7.0
 ```
 
 O comando imprime o sha256 para as duas linhas `ARG` do `Dockerfile`. Depois do
