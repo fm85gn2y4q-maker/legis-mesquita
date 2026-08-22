@@ -299,7 +299,14 @@ ALVO = (
     r"(?:d[ao]s?\s+|na\s+|no\s+|à\s+|a\s+|pel[ao]s?\s+)?"
     r"(Lei\s+Complementar|Lei|Decreto)\s+"
     r"(?:Municipal\s+|Ordin[áa]ri[ao]\s+)?"
-    r"n?[º°oO\.]{0,3}\s*"
+    # O `n` e o ordinal podem ficar separados por espaço, e ficam: a limpeza de
+    # abreviações, mais abaixo, troca o ponto de "n.º" por espaço, e "n.º 355"
+    # chega aqui como "n º 355". Sem o `\s*`, a Lei 628/2010 — cuja ementa é
+    # "Altera dispositivos da Lei Municipal n.º 355" — não produzia UMA aresta
+    # sequer. São 17 relações no acervo, e é a mesma família do `*` no separador
+    # de milhar: pontuação que o PDF diagrama de um jeito que a regex não
+    # previu, sem produzir erro nenhum que avisasse.
+    r"n?\s*[º°oO\.]{0,3}\s*"
     # Mesmo defeito que o do cabeçalho, e aqui ele custa mais caro: com `*`,
     # "Decreto nº 1059" era lido como 105 e "Decreto nº 2529" como 252. O ato
     # errado ficava marcado como revogado — uma norma viva declarada morta,
@@ -325,17 +332,38 @@ ABREVIACOES = re.compile(
 #
 # Ordem inversa é legítima e não cai nesta regra: "revogando o Decreto nº
 # 792/09 e as demais disposições em contrário" cita antes da cláusula.
+#
+# Ela também existe no SINGULAR, e dirigida a um ato: "revoga o disposto em
+# contrário NA Lei nº 224". A preposição muda tudo. "revogadas as disposições
+# em contrário, em especial A Lei X" revoga a Lei X inteira; "o disposto em
+# contrário NA Lei X" preserva a Lei X e alcança só o que nela conflitar — que
+# é revogação tácita, declaradamente fora do alcance desta base.
+#
+# Ler as duas do mesmo jeito matou a LC 15/2011 (Uso, Ocupação e Parcelamento
+# do Solo) e a Lei 224/2005 (Quadro Permanente de Pessoal), ambas vivas e de
+# consulta corrente. Achado pelo teste de aceitação de 22/08/2026, por uma
+# resposta que desconfiou da ferramenta e foi ler a lei alteradora inteira.
 CLAUSULA_DE_ESTILO = re.compile(
-    r"disposi[çc][õo]es\s+em\s+contr[áa]rio", re.IGNORECASE
+    r"disposi[çc][õo]es\s+em\s+contr[áa]rio|dispost[oa]\s+em\s+contr[áa]rio",
+    re.IGNORECASE,
 )
 
 # "Fica revogado o artigo 93 do Decreto nº 127" não revoga o Decreto 127: revoga
 # um artigo dele, e a norma segue viva sem aquele dispositivo. Registrar as duas
 # coisas como "revoga" faria a ferramenta declarar morta uma norma em vigor —
 # com a agravante de o trecho citado parecer confirmar.
+#
+# "dispositivos" é a palavra genérica para isso, e faltava: "Altera, acrescenta
+# e revoga dispositivos da Lei Municipal nº 1.206" entrava como revogação TOTAL
+# do Sistema de Licenciamento Ambiental, que segue em vigor.
+#
+# É `dispositivos?`, não `disposições`, e a diferença de uma letra decide:
+# "revogadas as disposições em contrário, em especial a Lei nº 930" revoga a
+# Lei 930 por inteiro, e tratar aquele "disposições" como menção a dispositivo
+# faria a ferramenta dizer que ela subsiste.
 DISPOSITIVO = re.compile(
-    r"\b(artigos?|arts?|incisos?|incs?|par[áa]grafos?|al[íi]neas?|caput|itens?|"
-    r"anexos?|§)\b|§",
+    r"\b(artigos?|arts?|dispositivos?|incisos?|incs?|par[áa]grafos?|al[íi]neas?"
+    r"|caput|itens?|anexos?|§)\b|§",
     re.IGNORECASE,
 )
 
@@ -601,7 +629,8 @@ def extrair_referencias(texto: str) -> list[tuple[str, str, int, int | None, str
     # "revogados os arts. 3º e 4º da Lei nº 828" precisa passar. Tira-se o
     # ponto das abreviações, e o ponto que sobra é de verdade.
     limpo = ABREVIACOES.sub(r"\1 ", limpo)
-    vistos: set[tuple[str, str, int, int | None]] = set()
+    # chave -> (confiança da classificação, posição em `achados`)
+    vistos: dict[tuple[str, str, int, int | None], tuple[int, int]] = {}
     for relacao, padrao in REFERENCIAS:
         for achado in padrao.finditer(limpo):
             numero = numero_inteiro(achado.group(2))
@@ -622,16 +651,38 @@ def extrair_referencias(texto: str) -> list[tuple[str, str, int, int | None, str
             extensao = "parcial" if parcial else "total"
 
             chave = (relacao, normalizar_tipo(achado.group(1)), numero, ano)
-            if chave in vistos:
-                # A mesma revogação costuma aparecer duas vezes no ato: uma na
-                # ementa, outra no artigo. É um fato só.
-                continue
-            vistos.add(chave)
-
             inicio = max(0, achado.start() - 90)
-            achados.append(
-                (*chave, extensao, limpo[inicio: achado.end() + 40].strip())
-            )
+            registro = (*chave, extensao, limpo[inicio: achado.end() + 40].strip())
+
+            # A mesma revogação costuma aparecer duas vezes no ato: uma na
+            # ementa, outra no artigo. É um fato só — mas as duas menções não
+            # valem o mesmo, e guardar cegamente a primeira era um defeito.
+            #
+            # A ementa resume ("Altera a Lei nº 553") e o artigo especifica
+            # ("altera o caput do art. 43"). Como a ementa vem antes, ela vencia
+            # a disputa e a relação era gravada como se atingisse a norma
+            # inteira. Para `altera` isso é ruído; para `revoga` seria declarar
+            # morta uma norma que perdeu um artigo.
+            #
+            # A ordem de confiança não é a ordem do texto:
+            #   2 — "revogada na íntegra"     → diz que é tudo, e diz de propósito
+            #   1 — "revogado o art. 93"      → nomeia o que atingiu
+            #   0 — "revoga a Lei nº 553"     → não diz nada sobre a extensão
+            #
+            # O silêncio (0) continua sendo lido como total, que é o que a
+            # frase quer dizer quando é a única. Mas perde para qualquer das
+            # duas menções que carregam prova.
+            confianca = 2 if (extensao == "total" and INTEGRALIDADE.search(intervalo)) \
+                else 1 if extensao == "parcial" else 0
+            if chave in vistos:
+                anterior, posicao = vistos[chave]
+                if confianca > anterior:
+                    achados[posicao] = registro
+                    vistos[chave] = (confianca, posicao)
+                continue
+
+            vistos[chave] = (confianca, len(achados))
+            achados.append(registro)
     return achados
 
 

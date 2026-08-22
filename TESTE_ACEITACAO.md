@@ -26,19 +26,19 @@ revogações **parciais** separado do de integrais — campo que só existe nest
 versão. Não vindo, remova e recrie o conector (ou reinstale a extensão) antes
 de rodar qualquer coisa.
 
-Os números da versão `v1.4.0`, conferidos contra o artefato publicado:
+Os números da versão `v1.5.0`, conferidos contra o artefato publicado:
 
 | | |
 |---|---|
 | Atos | **4.143** |
 | Com texto integral | 4.085 |
-| Páginas indexadas | 10.531 |
-| Atos com revogação **integral** | **84** |
-| Atos com revogação **parcial** | **16** |
+| Páginas indexadas | 10.536 |
+| Atos com revogação **integral** | **81** |
+| Atos com revogação **parcial** | **18** |
 
 Se isso não aparecer, o teste não começa. Qualquer número de versão
 anterior — 4.129 (v1.0.0), 4.128 (v1.1.0), 4.133 (v1.2.0) ou 4.134
-(v1.3.0) — significa cliente com a lista de ferramentas em cache: remova e
+(v1.3.0) —, ou 84 revogações integrais em vez de 81 (v1.4.0), significa cliente com a lista de ferramentas em cache: remova e
 recrie o conector, ou reinstale a extensão.
 
 ---

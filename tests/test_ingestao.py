@@ -551,3 +551,98 @@ def test_numero_com_separador_de_milhar():
     assert numero_inteiro("1.284") == 1284
     assert numero_inteiro("3.128") == 3128
     assert numero_inteiro("") is None
+
+
+# --- o que o teste de aceitação de 22/08/2026 encontrou ----------------------
+#
+# Três defeitos do grafo de vigência, nenhum deles pego pelos 107 testes que
+# existiam: todos mediam forma, e estes são de domínio. Quem os achou foi uma
+# resposta que desconfiou da ferramenta e foi ler a lei alteradora inteira.
+
+
+def test_clausula_dirigida_a_um_ato_nao_o_revoga():
+    """"revoga o disposto em contrário NA Lei X" preserva a Lei X.
+
+    A preposição decide. "revogadas as disposições em contrário, em especial A
+    Lei X" revoga a Lei X inteira; "o disposto em contrário NA Lei X" alcança
+    só o que nela conflitar — revogação tácita, fora do alcance desta base.
+
+    Ler as duas do mesmo jeito matou a LC 15/2011 (Uso e Ocupação do Solo) e a
+    Lei 224/2005 (Quadro Permanente de Pessoal), ambas vivas.
+    """
+    for frase in [
+        "Art. 2º – Esta lei entra em vigor na data da sua publicação, revogando "
+        "o disposto em contrário na Lei Complementar 15/2011.",
+        "Art. 4º – Esta lei revoga o disposto em contrário na Lei nº 224 de 22 "
+        "de dezembro de 2005.",
+    ]:
+        assert [a for a in extrair_referencias(frase) if a[0] == "revoga"] == [], frase
+
+
+def test_revogar_dispositivos_da_lei_e_revogacao_parcial():
+    """Caso real: a Lei 1.246/2024 entrava como revogação TOTAL da Lei
+    1.206/2022 — o Sistema de Licenciamento Ambiental, que segue em vigor."""
+    achados = extrair_referencias(
+        "Altera, acrescenta e revoga dispositivos da Lei Municipal nº 1.206, de "
+        "21 de setembro de 2022, que instituiu o Novo Sistema de Licenciamento."
+    )
+    assert ("revoga", 1206, "parcial") in [(a[0], a[2], a[4]) for a in achados]
+
+
+def test_disposicoes_em_contrario_nao_e_mencao_a_dispositivo():
+    """Controle do teste anterior, e a diferença é de uma letra.
+
+    `dispositivos` marca parcial; `disposições` não pode marcar, senão
+    "revogadas as disposições em contrário, em especial a Lei nº 930" diria
+    que a Lei 930 subsiste — e ela foi revogada por inteiro.
+    """
+    achados = extrair_referencias(
+        "Art. 49 - Esta Lei entra em vigor na data de sua publicação, revogadas "
+        "as disposições em contrário, em especial a Lei nº 930, de 14 de "
+        "outubro de 2015."
+    )
+    assert [(a[0], a[2], a[4]) for a in achados] == [("revoga", 930, "total")]
+
+
+def test_numero_com_ponto_antes_do_ordinal():
+    """"n.º 355" — o ponto vem ANTES do ordinal.
+
+    A limpeza de abreviações troca esse ponto por espaço, e o alvo não tolerava
+    o espaço entre o `n` e o `º`. A Lei 628/2010, cuja ementa é "Altera
+    dispositivos da Lei Municipal n.º 355", não produzia uma aresta sequer.
+    São 17 relações no acervo real.
+    """
+    achados = extrair_referencias(
+        "Altera dispositivos da Lei Municipal n.º 355 de 25 de outubro de 2006 "
+        "que dispõem sobre a composição do Conselho da Cidade."
+    )
+    assert ("altera", "lei", 355, 2006) in [a[:4] for a in achados]
+
+
+def test_a_ementa_generica_perde_para_o_artigo_que_especifica():
+    """A ementa resume, o artigo especifica — e a ementa vem primeiro.
+
+    Guardar cegamente a primeira menção fazia "Altera a Lei nº 553" (ementa,
+    sem dizer o quê) vencer "altera o caput do art. 4º" (artigo, que nomeia).
+    Para `altera` é ruído; para `revoga` seria declarar morta uma norma que
+    perdeu um artigo.
+    """
+    achados = extrair_referencias(
+        "Altera a Lei Municipal n.º 553 de 26 de agosto de 2009, que dispõe "
+        "sobre a criação do OMDC. Art. 1º - Altera o caput do art. 4º da Lei "
+        "nº 553 de 26 de agosto de 2009."
+    )
+    assert [(a[0], a[2], a[4]) for a in achados] == [("altera", 553, "parcial")]
+
+
+def test_integralidade_expressa_vence_a_mencao_a_artigo():
+    """Controle do teste anterior, na direção contrária.
+
+    Dizer "na íntegra" é afirmação deliberada sobre a extensão, e prevalece
+    sobre a menção a dispositivo, venha ela antes ou depois no texto.
+    """
+    achados = extrair_referencias(
+        "Art. 1º Fica revogado o art. 3º da Lei nº 828 de 1 de janeiro de 2012. "
+        "Art. 2º Fica revogada na íntegra a Lei nº 828 de 1 de janeiro de 2012."
+    )
+    assert [(a[0], a[2], a[4]) for a in achados] == [("revoga", 828, "total")]

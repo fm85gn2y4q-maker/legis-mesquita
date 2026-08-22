@@ -51,22 +51,46 @@ def publicado() -> Path:
 
 
 def corte(acervo: Path) -> str:
-    """Data a partir da qual reler o Diário, com margem para trás."""
+    """Data a partir da qual reler o Diário, com margem para trás.
+
+    A âncora é o ato **mais antigo que só existe no acervo do Diário** — não o
+    mais novo do acervo, que foi o erro original.
+
+    A reconstrução relê todos os PDFs por ato do portal, sempre. O que ela não
+    relê são as edições do Diário anteriores ao corte — e há atos que existem
+    *apenas* ali, porque o portal ainda não os publicou como PDF individual.
+    Ancorando no ato mais novo, a janela desliza para a frente a cada semana e
+    deixa para trás justamente esses.
+
+    Aconteceu em 22/08/2026: a janela começou em 29/07 e três atos de 27 e 28
+    de julho — dois decretos e a LDO de 2027 — sumiram do acervo reconstruído.
+    O diff os pegou e a rotina parou, que é o desenho funcionando. Mas parar
+    toda semana no mesmo defeito é convite a promover sem ler.
+
+    Reconhecem-se pelo caminho do arquivo: `DOM/2026/DOM_2026-07-28_002492.pdf`
+    veio do acervo do Diário; qualquer outro veio do portal e é redescoberto de
+    graça. Eram 17 em agosto de 2026, o mais antigo de 08/07.
+    """
     from legis.comparar import abrir
 
     conexao, temporario = abrir(acervo)
     try:
-        ultima = conexao.execute(
-            "SELECT MAX(data) FROM atos WHERE data IS NOT NULL").fetchone()[0]
+        # Só o Diário; e MIN, não MAX.
+        ancora = conexao.execute(
+            "SELECT MIN(data) FROM atos WHERE data IS NOT NULL "
+            "AND arquivo LIKE 'DOM/%'").fetchone()[0]
+        if not ancora:
+            ancora = conexao.execute(
+                "SELECT MAX(data) FROM atos WHERE data IS NOT NULL").fetchone()[0]
     finally:
         conexao.close()
         if temporario:
             import shutil
             shutil.rmtree(temporario.parent, ignore_errors=True)
 
-    if not ultima:
+    if not ancora:
         return "2026-01-01"
-    quando = datetime.strptime(ultima, "%Y-%m-%d").date() - timedelta(
+    quando = datetime.strptime(ancora, "%Y-%m-%d").date() - timedelta(
         days=MARGEM_DE_DIAS)
     return quando.isoformat()
 

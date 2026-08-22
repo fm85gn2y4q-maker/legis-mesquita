@@ -578,6 +578,76 @@ de integridade prova que o arquivo é o mesmo; não prova que ele presta.
 
 ---
 
+## 21. O teste de aceitação achou o que 107 testes automatizados não achavam
+
+Rodado em 22/08/2026 sobre a v1.4.0. Cinco conversas limpas, cada uma com uma
+pergunta e nada mais, proibidas de ler o disco. Resultado em
+`RESULTADO-TESTE-ACEITACAO.md`: aprovado, sem nenhuma citação inventada.
+
+O que importa aqui é o que ele encontrou **na base**, não nas respostas.
+
+### Três normas vivas marcadas como mortas
+
+| marcada como morta | a cláusula que a matou |
+|---|---|
+| LC 15/2011 — Uso, Ocupação e Parcelamento do Solo | "revogando o disposto em contrário **na** LC 15/2011" |
+| Lei 224/2005 — Quadro Permanente de Pessoal | "revoga o disposto em contrário **na** Lei nº 224" |
+| Lei 1.206/2022 — Licenciamento Ambiental | "revoga **dispositivos** da Lei nº 1.206" |
+
+O §6 deste documento já dizia que cláusula de estilo não é revogação, e a
+guarda estava escrita — só que no plural. "Revogam-se as disposições em
+contrário" era reconhecido; "revoga o disposto em contrário" não. E a
+preposição, que parece detalhe, inverte o sentido: *"em especial **a** Lei X"*
+revoga a Lei X inteira; *"o disposto em contrário **na** Lei X"* preserva a Lei
+X e alcança só o que nela conflitar — que é revogação tácita, declaradamente
+fora do alcance desta base.
+
+> Uma regra escrita para uma redação não é uma regra sobre o fenômeno. O
+> fenômeno aqui é "o legislador fecha o ato mandando cair o que conflitar", e
+> ele o escreve de pelo menos quatro maneiras. Eu tinha coberto uma.
+
+### Quem achou não foi a rubrica: foi a desconfiança
+
+A pergunta 3 era sobre o Plano Diretor. A resposta consultou a vigência, viu a
+LC 15/2011 sinalizada como revogada, **foi ler a lei revogadora inteira**, viu
+que ela só altera um inciso sobre plantio de árvores no "Habite-se", e avisou o
+advogado de que a ferramenta estava errada.
+
+Nenhuma linha da rubrica pedia isso. Eu não imaginei que fosse possível pedir.
+Vale como lição sobre o que um teste de aceitação é: **não é uma checagem das
+hipóteses de quem escreveu o teste** — é a única etapa em que alguém que não
+conhece o projeto olha para ele.
+
+### E dois defeitos que só apareceram porque tentei consertar os primeiros
+
+**A janela de releitura estava ancorada na ponta errada.** A rotina semanal
+relia o Diário a partir de `MAX(data) − 21 dias`. Mas quem corre risco de sumir
+não é o ato mais novo: é o mais **antigo** que existe *só* no acervo do Diário,
+porque o portal ainda não o publicou como PDF individual. A janela deslizava
+para a frente toda semana e deixava esses para trás. Na reconstrução, três atos
+sumiram — dois decretos e a LDO de 2027. O diff os pegou e a rotina parou, que
+é o desenho funcionando; mas parar toda semana no mesmo defeito é convite a
+promover sem ler. A âncora passou a ser `MIN(data)` entre os atos cujo arquivo
+vem de `DOM/`.
+
+**A Prefeitura reutiliza número de ato.** Existem dois Decretos 3.914/2026: um
+de 26 de junho, sobre mudança de simbologia de cargo em comissão, e outro de 8
+de julho, que abre crédito suplementar. Ambos publicados no Diário, ambos com
+esse número no próprio cabeçalho. Medido nas 152 edições de 2026: **três
+números reutilizados em 104 atos identificados**.
+
+A chave do acervo é `tipo-número-ano`. Ela pressupõe unicidade que o Município
+não pratica, e o resultado é uma quimera: um ato fica com o corpo de um e a
+ementa do outro. **Isto não foi consertado na v1.5.0** — consertar exige mudar
+o identificador de todos os atos, e com ele as URLs e o contrato das
+ferramentas. Fica registrado, medido, e é a primeira coisa a resolver numa v2.
+
+> É a quarta categoria de risco do §14 — *fronteira*: onde termina este ato e
+> começa o outro. Eu a tinha tratado dentro do arquivo. Ela também existe entre
+> arquivos, quando dois documentos reivindicam a mesma identidade.
+
+---
+
 ## O que eu repetiria em outra base
 
 1. Medir o pressuposto antes da primeira linha — aqui, se havia texto extraível.
