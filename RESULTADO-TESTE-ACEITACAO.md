@@ -168,6 +168,60 @@ foi feito ainda, de propósito.
 
 ---
 
+## Quarta medição: a instrução falhou, o dado pegou
+
+Depois das duas rodadas, mexi na instrução do servidor (v1.6.1). Ela passou a
+dizer **onde** a ressalva tem de aparecer, proibiu nominalmente "hoje",
+"atualmente" e "segue valendo", e trouxe os dois casos reais com o antes e o
+depois. Rodadas as mesmas perguntas:
+
+| | com a instrução nova |
+|---|---|
+| 3 | *"Sim, continua em vigor"* — terceira vez idêntica |
+| 1 | *"Não — **hoje** Mesquita não tem Conselho Municipal de Transportes"* |
+
+A pergunta 1 usou a palavra vetada. **Instrução a dez mil caracteres da
+pergunta não move a primeira frase.**
+
+Então a frase passou a viajar no dado: `verificar_vigencia` devolve
+`COMECE_A_RESPOSTA_POR_ESTA_FRASE`, pronta, com o número da lei dentro (v1.6.2).
+Rodadas de novo, as mesmas duas perguntas:
+
+> **3** — *"Não localizei revogação integral da Lei nº 355/2006 no acervo. Há
+> revogação parcial pela Lei nº 1.271/2025 e cinco alterações expressas
+> posteriores — confira quais dispositivos foram atingidos antes de citar."*
+>
+> **1** — *"A Lei nº 460/2008 foi expressamente revogada pela Lei nº
+> 1.106/2019, e não localizei ato posterior que a restabeleça."*
+
+As duas abrem com a frase da ferramenta, quase literal. Quatro rodadas de
+abertura categórica terminaram na primeira em que a frase certa veio pronta.
+
+E o padrão se estendeu sozinho: a resposta 1 aplicou a mesma forma a uma norma
+para a qual não pediu vigência de propósito — *"Não localizei revogação nem
+alteração expressa da Lei nº 638/2010 no acervo. Isso não equivale a dizer que
+ela está em vigor"* — que é, palavra por palavra, o quinto caso da frase
+gerada, para outro ato.
+
+### O erro que sobrou, e é da quarta categoria
+
+A resposta 1 diz que a Lei 1.271/2025 "enxugou o Conselho **de trinta** para
+quinze membros". O art. 128 original da Lei 355/2006 soma de fato 30 — mas a
+**Lei 628/2010 já o havia reduzido a 16**, e é contra essa redação que a de
+2025 deve ser comparada. A redução foi de 16 para 15.
+
+A ironia é exata: a mesma resposta que manda o advogado usar a redação de 2025
+comparou com a de 2006. A ferramenta entrega frase pronta para *vigência*; não
+entrega nada equivalente para *"a redação que você está tomando por base também
+já mudou"*.
+
+Isso também corrige o achado da rodada anterior. O quórum do art. 130, § 1º —
+16 conselheiros — não era impossível desde sempre: ele **casava exatamente**
+com os 16 membros da redação de 2010, e ficou impossível em 2025, quando a
+composição caiu para 15 sem que o quórum fosse ajustado.
+
+---
+
 ## A regressão da segunda rodada
 
 A pergunta 2 tem uma falha própria prevista na rubrica: **objeção de hierarquia

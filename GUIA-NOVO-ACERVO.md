@@ -327,6 +327,38 @@ Medido: *"erro de projeto básico justifica aditivo?"* não achou nada;
 *"deficiência do projeto básico"* achou na primeira tentativa. Instrua o modelo
 a reformular, e devolva no resultado a **expressão efetivamente executada**.
 
+### Instrução não move a primeira frase; o dado move
+
+Meça isto cedo, porque custa três rodadas para acreditar. A instrução do
+servidor será obedecida — na seção de ressalvas, ao final da resposta —
+enquanto a **frase de conclusão** afirma o contrário. E quem lê uma pesquisa lê
+a conclusão.
+
+No acervo de legislação a falha foi: *"Sim, o Plano Diretor continua em vigor"*
+aberto, e *"não localizei revogação"* no rodapé. Reescrevi a instrução dizendo
+onde a ressalva tem de estar e proibindo "hoje" pelo nome. A resposta seguinte
+abriu com *"Não — hoje Mesquita não tem Conselho"*.
+
+O que funcionou foi devolver a frase **pronta, dentro do payload da
+ferramenta**, com o número da norma já embutido e nada a compor:
+
+```json
+"COMECE_A_RESPOSTA_POR_ESTA_FRASE":
+  "A Lei nº 460/2008 foi expressamente revogada pela Lei nº 1.106/2019, e não
+   localizei no acervo ato posterior que a restabeleça. Ela não serve como base
+   atual."
+```
+
+Na medição seguinte as duas perguntas abriram com ela, e o padrão se estendeu
+sozinho a normas para as quais a frase não fora pedida.
+
+> Se um comportamento tem de acontecer **no momento em que a ferramenta
+> responde**, ele pertence ao payload, não ao preâmbulo. Instrução compete com
+> todo o resto do contexto; dado chega junto com a resposta.
+
+Vale para qualquer acervo cuja resposta tenha uma forma epistemológica correta
+e uma forma tentadora: gere a forma correta e entregue-a montada.
+
 ### As instruções do servidor são código, não documentação
 
 É por elas que o modelo raciocina. Regras que valeram:

@@ -699,6 +699,55 @@ obras e licenciamento, o silêncio desta base não significa nada.
 
 ---
 
+## 23. Instrução não move a primeira frase; o dado move
+
+O teste de aceitação mediu, duas vezes, a mesma falha: a ressalva correta na
+seção de limites, ao final, e a afirmação categórica na frase de conclusão —
+*"Sim, o Plano Diretor continua em vigor"*, *"Não, o Conselho foi extinto em
+2019"*. Quem lê a resposta inteira não se engana. Quem lê a conclusão e cita,
+sim, e é assim que se lê uma pesquisa.
+
+Diagnostiquei como conserto de instrução, e consertei a instrução. Ela passou a
+dizer onde a ressalva tem de aparecer, a proibir "hoje", "atualmente" e "segue
+valendo" pelo nome, e a trazer os dois casos reais com o antes e o depois.
+
+A resposta seguinte abriu com **"Não — hoje Mesquita não tem Conselho
+Municipal de Transportes"**.
+
+O que funcionou foi mover a frase para dentro do dado. `verificar_vigencia`
+passou a devolver `COMECE_A_RESPOSTA_POR_ESTA_FRASE`, montada com o número da
+lei dentro, sem nada para compor:
+
+```
+A Lei nº 460/2008 foi expressamente revogada pela Lei nº 1.106/2019, e não
+localizei no acervo ato posterior que a restabeleça. Ela não serve como base
+atual.
+```
+
+Na medição seguinte, as duas perguntas abriram com essa frase, quase literal. E
+o padrão se estendeu sozinho a uma norma para a qual a frase não havia sido
+pedida.
+
+> **Instrução compete com dez mil caracteres de contexto; dado chega junto com
+> a resposta.** Se um comportamento tem de acontecer no momento em que a
+> ferramenta responde, ele pertence ao *payload*, não ao preâmbulo. Foi assim
+> que a `advertencia` pegou desde o começo — e eu levei três medições para
+> perceber que era o mesmo mecanismo.
+
+O corolário incomoda: **instrução que descreve o certo não é conserto, é
+esperança.** A diferença entre as duas versões não é conteúdo — as duas dizem a
+mesma coisa. É posição.
+
+### O que isso não resolve
+
+A frase pronta cobre *vigência*. Na mesma rodada, a resposta comparou a
+composição do Conselho da Cidade com a redação de 2006 quando a de 2010 já a
+havia mudado — errando a quarta categoria do §14, *tempo*, dentro da resposta
+que acertou a conclusão. Não há frase pronta para "a redação que você tomou por
+base também já mudou", e escrever uma seria o passo seguinte.
+
+---
+
 ## O que eu repetiria em outra base
 
 1. Medir o pressuposto antes da primeira linha — aqui, se havia texto extraível.
