@@ -530,6 +530,54 @@ erraria por invenção. Numa base jurídica, as duas falhas não têm o mesmo pe
 
 ---
 
+## 20. A automação e a mão colidiram, e quase publicaram um acervo vazio
+
+Dia 22/08/2026, 10h. A tarefa agendada de sábado dispara sozinha e começa a
+reconstruir `dados/staging.sqlite` — e a ingestão, como sempre fez, **apaga o
+banco antes de recriá-lo**. Às 10h05, sem saber disso, eu copio o arquivo por
+cima do acervo publicado e mando comprimir. O `preparar_release.py` obedece:
+gera 117 bytes de gzip com **zero ato** dentro, sem uma linha de reclamação. O
+artefato da v1.3.0 eu já tinha apagado.
+
+O acervo voltou com `git checkout -- acervo/` — 4.134 atos, sha256 conferido,
+`integrity_check` intacto. É o único motivo pelo qual isto é uma anedota e não
+uma perda.
+
+Três coisas erradas ao mesmo tempo, e vale separá-las porque só a primeira é
+sobre concorrência:
+
+1. **Nada impedia dois processos de escreverem o mesmo banco.** Agora impede:
+   `legis/trava.py` grava um arquivo com o PID e o dono, recusa começar se o
+   dono ainda estiver vivo, e assume a trava se o PID estiver morto — trava
+   órfã de máquina desligada no meio não pode bloquear o sábado seguinte para
+   sempre.
+
+2. **O passo de publicar acreditava no que recebia.** `conferir()` agora recusa
+   comprimir acervo ilegível, com zero ato, ou menor que 95% do último
+   publicado, e imprime a contagem **antes** de comprimir. A trava evita a
+   corrida; esta conferência evita a consequência, venha ela de onde vier — e
+   custa uma consulta de `COUNT(*)`.
+
+3. **Eu apaguei a versão anterior antes de a nova estar pronta.** Nenhum código
+   conserta isso. Ficou como regra no `HOSPEDAGEM.md`: o `.gz` antigo sai
+   depois que o novo passou, não antes.
+
+O que este caso ensina não é "ponha um mutex". É que **um piso de sanidade no
+último passo pega a falha inteira de classes de causa que você não previu.**
+A trava resolve a corrida que aconteceu; `conferir()` teria pego essa e também
+o disco cheio, a cópia interrompida, o caminho errado e o meu dedo trocando
+`staging` por `mesquita` na direção contrária. O passo que publica é o lugar
+mais barato do projeto para desconfiar, porque é o último em que desconfiar
+ainda tem efeito.
+
+E o defeito era **silencioso por construção**: gzip de banco vazio é um arquivo
+válido, com hash legítimo, que descomprime sem erro e sobe no Docker sem
+reclamar. A cadeia de integridade inteira — sha256 declarado, conferido,
+`integrity_check` — teria dito *ok* a um acervo sem nenhuma lei dentro. Cadeia
+de integridade prova que o arquivo é o mesmo; não prova que ele presta.
+
+---
+
 ## O que eu repetiria em outra base
 
 1. Medir o pressuposto antes da primeira linha — aqui, se havia texto extraível.
@@ -541,3 +589,6 @@ erraria por invenção. Numa base jurídica, as duas falhas não têm o mesmo pe
    atribuição, só lendo.
 5. Procurar o fato de domínio que dispensa a sofisticação do padrão.
 6. Declarar o que a ferramenta **não** faz, no mesmo lugar em que ela responde.
+7. Pôr um piso de sanidade no passo que publica — contagem mínima, não
+   encolhimento. É o último lugar em que desconfiar ainda adianta, e ele pega
+   as causas que ninguém previu.

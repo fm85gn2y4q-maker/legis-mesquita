@@ -363,6 +363,31 @@ versão fixa → sha256 declarado → conferência no build → falha fechada
 
 Teste o caminho ruim: com hash errado, o passo tem de sair com código ≠ 0.
 
+E saiba o que ela **não** prova. Cadeia de integridade responde "é o mesmo
+arquivo?", nunca "esse arquivo presta?". Um gzip de banco vazio é válido, tem
+hash legítimo, descomprime sem erro e passa no `integrity_check` — a cadeia
+inteira diria *ok* a um acervo sem um registro dentro. Foi o que quase subiu
+aqui, em 117 bytes.
+
+### Piso de sanidade no passo que publica
+
+O passo que comprime tem de recusar o absurdo antes de produzir o artefato:
+acervo ilegível, com zero registro, ou menor que ~95% do último publicado. Duas
+consultas de `COUNT(*)`, e a contagem impressa **antes** de comprimir.
+
+Vale mais do que parece, e não pelo motivo óbvio. O incidente aqui foi uma
+corrida — a rotina agendada apagou o banco para recriá-lo no exato minuto em
+que a mão o copiava — e a corrida se resolve com uma trava de PID. Mas a trava
+só cobre a causa que aconteceu; o piso de sanidade cobre também o disco cheio,
+a cópia interrompida, o caminho digitado ao contrário e a ingestão que rodou
+sobre pasta vazia.
+
+> O último passo antes de publicar é o lugar mais barato do projeto para
+> desconfiar, porque é o último em que desconfiar ainda tem efeito.
+
+E não apague a versão anterior antes de a nova ter passado. Nenhum código
+conserta isso — é ordem de operações, e o que salvou foi o Git.
+
 ### Onde o artefato de dados mora
 
 Princípio herdado: "dado não é código-fonte, vai como asset de release". Foi

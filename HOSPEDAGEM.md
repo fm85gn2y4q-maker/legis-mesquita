@@ -185,8 +185,10 @@ python preparar_release.py 1.5.0
 
 Gera `dist/legislacao-mesquita-v1.5.0.db.gz` e imprime o sha256. Então:
 
-1. mova o `.gz` para `acervo/` e **apague o anterior** — senão cada versão fica
-   somando ~23 MB à imagem;
+1. mova o `.gz` para `acervo/`. **Apague o anterior só depois que o novo tiver
+   passado** — senão cada versão fica somando ~23 MB à imagem, mas apagar antes
+   deixa você sem para onde voltar. Foi o que aconteceu em 22/08/2026 (§20 do
+   `METODO.md`), e o que salvou foi o Git, não a prudência;
 2. troque as duas linhas `ARG` do `Dockerfile` pelo novo nome e hash;
 3. `git add -A && git commit && git push` — o Render reconstrói sozinho;
 4. **recrie os conectores** nos dois clientes.
