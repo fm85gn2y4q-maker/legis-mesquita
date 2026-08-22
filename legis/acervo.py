@@ -485,8 +485,83 @@ class Acervo:
             "não equivale a vigência; veja `advertencia`."
         )
 
+        # A frase pronta, com o nome do ato dentro.
+        #
+        # `situacao_no_acervo`, acima, descreve o estado do acervo e funciona: as
+        # respostas a reproduzem — na seção de limites, ao final. E abrem com
+        # "Sim, continua em vigor" ou "Não, foi extinto em 2019".
+        #
+        # Medido três vezes. Na terceira, a instrução do servidor já proibia a
+        # abertura categórica, nomeava as palavras vetadas — "hoje",
+        # "atualmente", "segue valendo" — e trazia os dois casos reais com o
+        # antes e o depois. A resposta seguinte abriu com "Não — HOJE Mesquita
+        # não tem Conselho Municipal de Transportes".
+        #
+        # Instrução a dez mil caracteres de distância não move a primeira frase.
+        # O que se reproduz é o que vem junto do dado, no momento em que a
+        # pergunta é respondida — foi assim que a `advertencia` pegou. Então a
+        # frase que a resposta deve usar viaja pronta, com o número da lei
+        # dentro, sem nada para o modelo compor.
+        # Forma curta, para caber numa frase: "a Lei nº 460/2008". A `citacao`
+        # completa ("Mesquita/RJ, Lei nº 460, de 18 de junho de 2008") é a que
+        # vai para a peça, e emperra no meio de uma oração.
+        def _curto(tipo, numero, ano):
+            return f"{ROTULOS.get(tipo, tipo)} nº {numero_formatado(numero)}/{ano}"
+
+        esta = _curto(ato.tipo, ato.numero, ato.ano)
+
+        def _cita(itens):
+            """"pela Lei nº 1.106/2019" para um; "por A, B e C" para vários."""
+            atos = [o for i in itens if (o := self.obter(i["id"])) is not None]
+            nomes = list(dict.fromkeys(_curto(o.tipo, o.numero, o.ano) for o in atos))
+            if not nomes:
+                return "por outro ato do acervo"
+            if len(nomes) == 1:
+                return f"{'pelo' if atos[0].tipo == 'decreto' else 'pela'} {nomes[0]}"
+            return "por " + ", ".join(nomes[:-1]) + f" e {nomes[-1]}"
+
+        # Decreto é masculino; lei e lei complementar, femininas. A frase vai
+        # ser copiada literalmente para dentro de uma peça — concordância errada
+        # aqui não é detalhe de estilo, é o advogado tendo de reescrever.
+        masculino = ato.tipo == "decreto"
+        da, revogado, ele, este = (
+            ("do", "revogado", "ele", "Ele") if masculino
+            else ("da", "revogada", "ela", "Ela"))
+        quantas = lambda n: "1 alteração expressa posterior" if n == 1 else \
+            f"{n} alterações expressas posteriores"
+
+        if integrais:
+            frase = (f"{'O' if masculino else 'A'} {esta} foi expressamente "
+                     f"{revogado} {_cita(integrais)}, e não localizei no acervo "
+                     f"ato posterior que {'o' if masculino else 'a'} restabeleça. "
+                     f"{este} não serve como base atual.")
+        elif parciais and alteracoes:
+            frase = (f"Não localizei revogação integral {da} {esta} no acervo. "
+                     f"Há revogação parcial {_cita(parciais)} e "
+                     f"{quantas(len(alteracoes))} — confira quais dispositivos "
+                     f"foram atingidos antes de citar.")
+        elif parciais:
+            frase = (f"Não localizei revogação integral {da} {esta} no acervo. "
+                     f"Há revogação parcial {_cita(parciais)} — confira quais "
+                     f"dispositivos caíram antes de citar.")
+        elif alteracoes:
+            frase = (f"Não localizei revogação {da} {esta} no acervo. Há "
+                     f"{quantas(len(alteracoes))}, {_cita(alteracoes)}: a "
+                     f"redação guardada aqui é a original, não a atual.")
+        else:
+            frase = (f"Não localizei revogação nem alteração expressa {da} {esta} "
+                     f"no acervo. Isso não equivale a dizer que {ele} está em vigor.")
+
         return {
             "ato": ato.para_dict(),
+            "COMECE_A_RESPOSTA_POR_ESTA_FRASE": frase,
+            "por_que_esta_frase": (
+                "Ela diz o que o acervo prova, e não afirma o estado atual da "
+                "norma — que esta base não alcança. Use-a na CONCLUSÃO, não num "
+                "rodapé de ressalvas: quem lê uma pesquisa lê a primeira linha. "
+                "Não abra com 'sim, está em vigor', 'não, foi extinta', 'hoje', "
+                "'atualmente' nem 'segue valendo'."
+            ),
             "situacao_no_acervo": situacao,
             "revogado_integralmente_por": integrais,
             "revogado_parcialmente_por": parciais,

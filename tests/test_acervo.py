@@ -208,3 +208,53 @@ def test_numero_e_data_no_formato_juridico():
     assert numero_formatado(46) == "46"
     assert por_extenso("2019-01-11") == "11 de janeiro de 2019"
     assert por_extenso(None) is None
+
+
+# --- a frase pronta, escrita depois de a instrução falhar --------------------
+#
+# Três medições. A regra existia e era obedecida — no rodapé —, e a abertura
+# seguia categórica. Na terceira, a instrução já proibia "hoje" nominalmente, e
+# a resposta abriu com "Não — HOJE Mesquita não tem Conselho Municipal de
+# Transportes". O que se reproduz é o que vem junto do dado.
+
+CHAVE = "COMECE_A_RESPOSTA_POR_ESTA_FRASE"
+
+
+def test_frase_pronta_nunca_afirma_vigencia(acervo):
+    """Nenhum dos três casos pode afirmar o estado atual da norma."""
+    for identificador in ("lei-460-2008", "decreto-3128-2022", "lei-1106-2019"):
+        frase = acervo.vigencia(identificador)[CHAVE].lower()
+        for proibida in ("continua em vigor", "segue valendo", "atualmente", "hoje"):
+            assert proibida not in frase, f"{identificador}: {frase}"
+        # "está em vigor" só pode aparecer negado
+        if "está em vigor" in frase:
+            assert "não equivale a dizer que" in frase, frase
+
+
+def test_frase_pronta_da_revogacao_nomeia_quem_revogou(acervo):
+    """Sem o número dentro, a frase é um molde, não algo que se copia."""
+    frase = acervo.vigencia("lei-460-2008")[CHAVE]
+    assert frase.startswith("A Lei nº 460/2008 foi expressamente revogada "
+                            "pela Lei nº 1.106/2019")
+    assert "não serve como base atual" in frase
+
+
+def test_frase_pronta_da_revogacao_parcial_nao_mata_a_norma(acervo):
+    """O decreto perdeu um artigo e recebeu alteração: as duas coisas na frase."""
+    frase = acervo.vigencia("decreto-3128-2022")[CHAVE]
+    assert frase.startswith("Não localizei revogação integral do Decreto nº 3.128/2022")
+    assert "revogação parcial" in frase
+
+
+def test_frase_pronta_concorda_com_o_genero_da_especie(acervo):
+    """Decreto é masculino; lei e lei complementar, femininas. A frase vai ser
+    colada dentro de uma peça, e concordância errada é retrabalho do advogado."""
+    assert " do Decreto nº 3.128/2022" in acervo.vigencia("decreto-3128-2022")[CHAVE]
+    assert " da Lei nº 1.106/2019" in acervo.vigencia("lei-1106-2019")[CHAVE]
+
+
+def test_frase_pronta_diz_ao_modelo_onde_usa_la(acervo):
+    """A frase sozinha não basta: o defeito medido foi de POSIÇÃO."""
+    resposta = acervo.vigencia("lei-460-2008")
+    assert "CONCLUSÃO" in resposta["por_que_esta_frase"]
+    assert "rodapé" in resposta["por_que_esta_frase"]
