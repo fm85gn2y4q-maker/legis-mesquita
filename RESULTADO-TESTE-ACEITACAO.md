@@ -271,6 +271,66 @@ exatamente a faixa da pergunta.
 
 ---
 
+## Quinta rodada: as cinco na v1.6.2
+
+| | citações conferidas | fora do acervo | usos da frase pronta |
+|---|---|---|---|
+| 1 · revogada | 17 | 0 | 1 |
+| 2 · alterada | 27 | 0 | 2 |
+| 3 · parcial | 25 | **1** | 2 |
+| 4 · ementa | 12 | 0 | 1 |
+| 5 · vocabulário | 17 | 0 | 5 |
+| | **98** | **1** | **11** |
+
+A única citação fora do acervo é a LC 1/2002, o Código de Obras — a lacuna
+conhecida, que a própria resposta declara com todas as letras porque a v1.6.0 a
+nomeou nos limites. Não é erro: é a base funcionando.
+
+**A frase pronta foi usada onze vezes em cinco respostas**, e a maior parte
+delas em normas que não eram o objeto da pergunta. A resposta 5 a usou três
+vezes seguidas, para a Lei 629/2010, o Código de Posturas e o Código de Meio
+Ambiente. O padrão deixou de ser cópia e virou forma.
+
+### As duas falhas antigas não voltaram
+
+**Hierarquia pela espécie** (falha específica da pergunta 2, que apareceu na
+segunda rodada) — desta vez a objeção veio ancorada onde deve:
+
+> *"alteração de Código Tributário instituído por lei complementar municipal,
+> feita por lei ordinária, **esbarra na reserva da Lei Orgânica**. Vale conferir
+> a sequência no Diário Oficial e o processo legislativo na Câmara."*
+
+Reserva de matéria, não superioridade genérica; e mandando conferir em vez de
+decidir. É exatamente o comportamento que a rubrica pede.
+
+**Conclusão categórica** — a pergunta 3 abre com a frase da ferramenta,
+literal. A pergunta 1 abre com "Não." mas fundamenta na mesma oração: *"foi
+expressamente revogado na íntegra pela Lei nº 1.106/2019, e não localizei no
+acervo ato posterior que o restabeleça"*.
+
+### A falha que ficou, e agora é reprodutível
+
+A pergunta 1 diz que a Lei 1.271/2025 "reduziu o Conselho da Cidade **de 30
+para 15** membros". Errado pela segunda rodada seguida: o art. 128 original soma
+30, mas a **Lei 628/2010 já o havia reduzido a 16**. A comparação certa é 16
+para 15.
+
+O que torna o caso instrutivo é que **a pergunta 3, na mesma rodada, acertou**:
+*"O art. 128 já vinha alterado pelas Leis nº 628/2010 e 665/2010 antes da
+redação de 2025."* (Com um deslize próprio: a Lei 665/2010 altera os arts. 43,
+44 e 122, não o 128.)
+
+Duas respostas, o mesmo acervo, a mesma aresta no grafo — e uma comparou com a
+redação de 2006 enquanto a outra viu a de 2010. A diferença é que a vigência
+entrega **frase pronta** e a cadeia de redações não entrega nada: o grafo diz
+*quem* alterou, nunca *o que a redação dizia antes desta*.
+
+É a mesma lição do §23 do `METODO.md`, ainda por aplicar: enquanto for preciso
+o modelo compor a comparação, ele vai compor com o texto que tem na mão — que é
+sempre o original.
+
+---
+
 ## O que este teste continua não cobrindo
 
 Revogação tácita, pelo motivo já registrado. E, agora, uma segunda coisa
