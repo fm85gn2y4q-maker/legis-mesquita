@@ -28,6 +28,11 @@ ATOS = [
      "Dispõe sobre a abertura do exercício financeiro de 2022.",
      "Art. 1º Fica aberto o orçamento para o exercício financeiro de 2022 dos "
      "órgãos da administração direta."),
+    # Segundo alterador do mesmo decreto: sem ele não há "redação do meio" para
+    # saltar, e o aviso de cadeia não teria caso para testar.
+    ("lei-1150-2020", "lei", 1150, 2020, "2020-03-10",
+     "Altera o Decreto nº 3.128 de 03 de janeiro de 2022.",
+     "Art. 1º Dá nova redação ao artigo 3º do Decreto nº 3.128."),
 ]
 
 
@@ -64,6 +69,12 @@ def acervo(tmp_path):
         ("lei-1106-2019", "altera", "decreto", 3128, 2022, "decreto-3128-2022",
          "municipal", "parcial",
          "Dá nova redação ao artigo 2º do Decreto nº 3.128 de 03 de janeiro de 2022"),
+    )
+    conexao.execute(
+        "INSERT INTO referencias VALUES (?,?,?,?,?,?,?,?,?)",
+        ("lei-1150-2020", "altera", "decreto", 3128, 2022, "decreto-3128-2022",
+         "municipal", "parcial",
+         "Dá nova redação ao artigo 3º do Decreto nº 3.128"),
     )
     conexao.execute("INSERT INTO acervo_info VALUES ('resumo', '{}')")
     conexao.executescript(INDICES)
@@ -258,3 +269,20 @@ def test_frase_pronta_diz_ao_modelo_onde_usa_la(acervo):
     resposta = acervo.vigencia("lei-460-2008")
     assert "CONCLUSÃO" in resposta["por_que_esta_frase"]
     assert "rodapé" in resposta["por_que_esta_frase"]
+
+
+def test_aviso_de_cadeia_so_aparece_quando_ha_o_que_saltar(acervo):
+    """Com uma alteração só não há redação do meio para pular — e aviso que
+    aparece sempre vira ruído que ninguém lê."""
+    assert "ANTES_DE_COMPARAR_REDACOES" not in acervo.vigencia("lei-460-2008")
+    assert "ANTES_DE_COMPARAR_REDACOES" not in acervo.vigencia("lei-1106-2019")
+
+
+def test_aviso_de_cadeia_nao_afirma_qual_dispositivo_foi_atingido(acervo):
+    """A extração do artigo alvo foi medida e reprovada: na Lei 628/2010 ela
+    inventava o art. 132 e perdia o 130. O aviso é verdadeiro sem depender
+    dela — e não pode voltar a prometer o que não sabe."""
+    resposta = acervo.vigencia("decreto-3128-2022")
+    aviso = resposta["ANTES_DE_COMPARAR_REDACOES"]
+    assert "art." not in aviso.lower()
+    assert "ORIGINAL" in aviso

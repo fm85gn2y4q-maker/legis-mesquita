@@ -738,13 +738,48 @@ O corolário incomoda: **instrução que descreve o certo não é conserto, é
 esperança.** A diferença entre as duas versões não é conteúdo — as duas dizem a
 mesma coisa. É posição.
 
-### O que isso não resolve
+### O passo seguinte, e a extração que eu não publiquei
 
-A frase pronta cobre *vigência*. Na mesma rodada, a resposta comparou a
-composição do Conselho da Cidade com a redação de 2006 quando a de 2010 já a
-havia mudado — errando a quarta categoria do §14, *tempo*, dentro da resposta
-que acertou a conclusão. Não há frase pronta para "a redação que você tomou por
-base também já mudou", e escrever uma seria o passo seguinte.
+A frase pronta cobre *vigência*. Ela não cobre o erro que apareceu em duas
+rodadas seguidas: a resposta lê o art. 128 da Lei 355/2006 (30 membros,
+redação de 2006), lê a Lei 1.271/2025 (15 membros) e conclui "reduziu de 30
+para 15". A Lei 628/2010 já o havia levado a 16.
+
+Na quinta rodada, uma resposta errou e outra acertou — mesmo acervo, mesma
+aresta. A diferença é estrutural: **o grafo diz QUEM alterou; nunca o que a
+redação dizia antes desta.**
+
+O conserto óbvio era extrair, do ato alterador, qual dispositivo do alvo ele
+atinge — assim a ferramenta poderia dizer "o art. 128 já foi mexido em 2010".
+Escrevi o extrator e o medi contra oito atos cujo alvo eu conhecia:
+
+```
+Lei 628/2010    extraiu [119, 128, 132]   correto: 119, 128, 130
+LC 47/2023      extraiu [20]              correto: 20 a 23
+LC 52/2024      misturou artigos da LC 36 com artigos do Código Tributário
+```
+
+Inventou um artigo, perdeu outro, e leu "arts. 20 a 23" como só o 20. **Não
+publiquei.** Número de artigo errado é precisamente o erro de aparência
+impecável contra o qual esta base inteira foi construída, e uma etiqueta
+dizendo "extraído automaticamente, pode estar incompleto" não protege contra
+uma entrada *errada* — só contra as que faltam.
+
+O que foi publicado é o aviso que não depende de extração nenhuma, e por isso é
+verdadeiro por construção:
+
+> São 5 atos alteradores de 2009 a 2025, e o texto guardado aqui é o ORIGINAL.
+> Antes de dizer o que a alteração mais recente mudou, verifique se aquele
+> mesmo dispositivo já não havia sido alterado por um dos anteriores.
+
+Ele aparece só quando há duas ou mais alterações — com uma só não existe
+redação do meio para saltar, e aviso que aparece sempre é ruído que ninguém lê.
+
+> A tentação, depois de um conserto que funcionou, é aplicar o mesmo molde ao
+> problema seguinte sem medir. Medi, e o molde não coube: a frase de vigência é
+> derivada de fatos que o acervo tem: a lista de dispositivos exigiria fatos
+> que ele não tem. **Entregar pronto só é honesto quando o que se entrega é
+> certo** — do contrário, é dar autoridade a um palpite.
 
 ---
 

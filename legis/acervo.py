@@ -552,9 +552,47 @@ class Acervo:
             frase = (f"Não localizei revogação nem alteração expressa {da} {esta} "
                      f"no acervo. Isso não equivale a dizer que {ele} está em vigor.")
 
+        # O erro que a frase acima NÃO cobre, medido em duas rodadas seguidas.
+        #
+        # A resposta lê o art. 128 da Lei 355/2006 (30 membros, redação de
+        # 2006), lê a Lei 1.271/2025 (15 membros) e conclui "reduziu de 30 para
+        # 15". Errado: a Lei 628/2010 já o havia levado a 16. A comparação certa
+        # é 16 para 15.
+        #
+        # Na mesma rodada, outra resposta acertou — viu a de 2010. A diferença
+        # não é competência: é que a vigência entrega frase pronta e a cadeia de
+        # redações não entrega nada. O grafo diz QUEM alterou; nunca o que a
+        # redação dizia antes desta.
+        #
+        # Tentei extrair do ato alterador qual dispositivo ele atinge, para
+        # dizer "o art. 128 já foi mexido em 2010". Medido: na Lei 628/2010 a
+        # extração inventou o art. 132 e perdeu o 130; na LC 47/2023 pegou só o
+        # primeiro de "arts. 20 a 23". Número de artigo errado é o erro de
+        # aparência impecável que esta base existe para evitar, então a lista
+        # não é publicada. O que se publica é o aviso — que é verdadeiro sem
+        # depender de extração nenhuma.
+        aviso_de_cadeia = None
+        if len(alteracoes) >= 2:
+            anos = sorted(
+                o.ano for i in alteracoes if (o := self.obter(i["id"])) is not None
+            )
+            faixa = f"de {anos[0]} a {anos[-1]}" if anos else ""
+            aviso_de_cadeia = (
+                f"São {len(alteracoes)} atos alteradores {faixa}, e o texto "
+                f"guardado aqui é o ORIGINAL. Antes de dizer o que a alteração "
+                f"mais recente mudou, verifique se aquele mesmo dispositivo já "
+                f"não havia sido alterado por um dos anteriores: comparar a "
+                f"redação nova com a original, saltando as do meio, produz uma "
+                f"afirmação errada com aparência de correta. Os atos "
+                f"alteradores estão listados em `alterado_por` na ordem "
+                f"cronológica; leia o texto dos anteriores antes de concluir."
+            )
+
         return {
             "ato": ato.para_dict(),
             "COMECE_A_RESPOSTA_POR_ESTA_FRASE": frase,
+            **({"ANTES_DE_COMPARAR_REDACOES": aviso_de_cadeia}
+               if aviso_de_cadeia else {}),
             "por_que_esta_frase": (
                 "Ela diz o que o acervo prova, e não afirma o estado atual da "
                 "norma — que esta base não alcança. Use-a na CONCLUSÃO, não num "
