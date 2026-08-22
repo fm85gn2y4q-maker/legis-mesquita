@@ -17,13 +17,69 @@ import sys
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
+sys.path.insert(0, str(RAIZ))
 BANCO = RAIZ / "dados" / "mesquita.sqlite"
+
+
+# Piso de sanidade. O acervo cresce alguns atos por semana; encolher é sinal de
+# que algo deu errado antes daqui, e comprimir mesmo assim publica o defeito.
+ENCOLHIMENTO_TOLERADO = 0.95
+
+
+def conferir(banco: Path) -> bool:
+    """Recusa comprimir um acervo vazio ou menor que o publicado.
+
+    Escrito depois de 22/08/2026, quando a rotina agendada e uma publicação
+    manual colidiram: a ingestão da rotina tinha acabado de apagar o banco para
+    recriá-lo, a publicação copiou o arquivo vazio, e este programa comprimiu
+    **zero ato** em 117 bytes de gzip sem reclamar. A trava em `legis/trava.py`
+    evita a corrida; esta conferência evita a consequência, venha ela de onde
+    vier.
+    """
+    import sqlite3
+
+    try:
+        conexao = sqlite3.connect(f"file:{banco.as_posix()}?mode=ro", uri=True)
+        atos = conexao.execute("SELECT COUNT(*) FROM atos").fetchone()[0]
+        conexao.close()
+    except sqlite3.Error as erro:
+        print(f"{banco} não é um acervo legível: {erro}", file=sys.stderr)
+        return False
+
+    if not atos:
+        print(f"{banco} tem ZERO atos. Nada será comprimido.", file=sys.stderr)
+        return False
+
+    publicados = sorted((RAIZ / "acervo").glob("*.db.gz"))
+    if publicados:
+        from legis.comparar import abrir
+
+        conexao, temporario = abrir(publicados[-1])
+        try:
+            antes = conexao.execute("SELECT COUNT(*) FROM atos").fetchone()[0]
+        finally:
+            conexao.close()
+            if temporario:
+                shutil.rmtree(temporario.parent, ignore_errors=True)
+
+        if atos < antes * ENCOLHIMENTO_TOLERADO:
+            print(f"O acervo encolheu: {antes} → {atos} atos, contra "
+                  f"{publicados[-1].name}. Rode `python -m legis.comparar` "
+                  f"e leia o diff antes de publicar.", file=sys.stderr)
+            return False
+        print(f"{atos} atos ({antes} na versão publicada).")
+    else:
+        print(f"{atos} atos.")
+    return True
 
 
 def preparar(versao: str, usuario_repo: str = "SEU-USUARIO/legis-mesquita") -> int:
     if not BANCO.exists():
         print(f"Acervo não encontrado em {BANCO}. Rode a ingestão antes.",
               file=sys.stderr)
+        return 1
+
+    if not conferir(BANCO):
         return 1
 
     destino = RAIZ / "dist" / f"legislacao-mesquita-v{versao}.db.gz"

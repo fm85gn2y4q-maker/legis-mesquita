@@ -34,6 +34,7 @@ PYTHON = sys.executable
 DIARIOS = Path(os.path.expanduser("~/Mesquita_Diarios_Oficiais"))
 LEGISLACAO = Path(os.path.expanduser("~/Mesquita_Legislacao"))
 STAGING = RAIZ / "dados" / "staging.sqlite"
+TRAVA = RAIZ / "dados" / ".atualizando"
 
 # Reler edição já lida é barato — a deduplicação por conteúdo resolve — e a
 # margem protege contra ato publicado com atraso ou republicado. Perder um ato
@@ -84,6 +85,18 @@ def main(argv: list[str] | None = None) -> int:
     argumentos = analisador.parse_args(argv)
 
     sys.path.insert(0, str(RAIZ))
+
+    # A rotina agendada e a mão do usuário escrevem no mesmo staging, e
+    # `construir` abre apagando o banco. Sem trava, quem chega no meio copia um
+    # arquivo vazio — foi o que aconteceu em 22/08/2026, e o acervo publicado
+    # chegou a ser gerado com zero ato.
+    from legis.trava import exclusiva
+
+    with exclusiva(TRAVA, quem=f"atualizar.py em {date.today():%d/%m %H:%M}"):
+        return _executar(argumentos)
+
+
+def _executar(argumentos) -> int:
     atual = publicado()
     desde = argumentos.desde or corte(atual)
     print(f"acervo publicado: {atual.name}")

@@ -48,9 +48,9 @@ winget install --id Cloudflare.cloudflared
 
 | | |
 |---|---|
-| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.3.0` |
-| Acervo | `acervo/legislacao-mesquita-v1.3.0.db.gz` — **21,0 MB**, versionado no repositório |
-| sha256 | `c396f3b9c5dbe83e16785dac92b1350edd937d412c2126fb5fe335d1687c24ae` |
+| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.4.0` |
+| Acervo | `acervo/legislacao-mesquita-v1.4.0.db.gz` — **21,1 MB**, versionado no repositório |
+| sha256 | `f104cc4aa34ec5a2d6ce99b2bf83b32469dd2d09bf177c9fdf84c42b11247b25` |
 | `Dockerfile` | descomprime o acervo do repositório, conferindo o hash |
 | `render.yaml` | pronto, sem `healthCheckPath` (veja o porquê no próprio arquivo) |
 
@@ -58,8 +58,8 @@ winget install --id Cloudflare.cloudflared
 e confere o sha256 antes de usar. A decisão anterior era outra — asset de
 release — e a troca está registrada no `METODO.md`.
 
-O passo do build foi verificado fora do Docker: reproduz 4.134 atos, 10.514
-páginas, 83 revogações integrais e 16 parciais, com `integrity_check` intacto —
+O passo do build foi verificado fora do Docker: reproduz 4.143 atos, 10.531
+páginas, 84 revogações integrais e 16 parciais, com `integrity_check` intacto —
 e para a construção quando o hash não bate.
 
 ### 3.1. Criar o repositório e subir o código
@@ -95,7 +95,7 @@ e resolve. Criar o repositório e autorizar o acesso é você quem faz — conce
 acesso a um terceiro vincula a sua identidade, e isso não se delega.
 
 O SQLite de 72 MB **não** vai nesse push: o `.gitignore` o mantém fora. Vão o
-código e o acervo comprimido, de 21,0 MB.
+código e o acervo comprimido, de 21,1 MB.
 
 ### 3.2. Aplicar o Blueprint
 
@@ -159,10 +159,10 @@ A resposta tem de bater com a versão publicada:
 
 | | |
 |---|---|
-| Atos | **4.134** |
-| Com texto integral | 4.076 |
-| Páginas indexadas | 10.514 |
-| Revogações **integrais** | **83** |
+| Atos | **4.143** |
+| Com texto integral | 4.085 |
+| Páginas indexadas | 10.531 |
+| Revogações **integrais** | **84** |
 | Revogações **parciais** | **16** |
 
 Não batendo, o conector está com uma versão antiga em cache — **remova e recrie
@@ -180,10 +180,10 @@ copy dados\staging.sqlite dados\mesquita.sqlite
 ```
 
 ```bash
-python preparar_release.py 1.4.0
+python preparar_release.py 1.5.0
 ```
 
-Gera `dist/legislacao-mesquita-v1.4.0.db.gz` e imprime o sha256. Então:
+Gera `dist/legislacao-mesquita-v1.5.0.db.gz` e imprime o sha256. Então:
 
 1. mova o `.gz` para `acervo/` e **apague o anterior** — senão cada versão fica
    somando ~23 MB à imagem;

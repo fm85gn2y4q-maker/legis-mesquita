@@ -212,10 +212,21 @@ def parece_cabecalho(texto: str, achado: re.Match) -> bool:
     return bool(CORPO_DE_ATO.search(texto[achado.end(): achado.end() + 4000]))
 
 # Fórmulas que encerram a ementa e abrem o corpo do ato.
+#
+# `Art. 1` só encerra quando ABRE a linha. Em qualquer posição, ele truncava a
+# ementa que CITA um artigo — e é o que a ementa de lei alteradora faz o tempo
+# todo: "Altera o caput e insere incisos no **art. 1º** da Lei 1.275/2025, para
+# ampliar o rol de áreas passíveis de execução por Organizações Sociais" virava
+# "Altera o caput e insere incisos no". Some justamente o objeto da norma.
+#
+# Medido em 4.085 atos: a exigência de início de linha recupera 35 ementas e
+# não encurta nenhuma. No acervo de hoje só duas mudam, porque nas outras 33 a
+# ementa do portal prevalece — mas ato vindo do Diário não tem ementa no
+# catálogo, e desde que a atualização passou a ler o DOM é a do PDF que vale.
 FIM_DA_EMENTA = re.compile(
     r"(O\s+PREFEITO|A\s+C[ÂA]MARA|O\s+POVO\s+DO\s+MUNIC[ÍI]PIO|Fa[çc]o\s+saber"
-    r"|DECRETA\s*:|D\s*E\s*C\s*R\s*E\s*T\s*A|LEI\s*:|Art\.\s*1)",
-    re.IGNORECASE,
+    r"|DECRETA\s*:|D\s*E\s*C\s*R\s*E\s*T\s*A|LEI\s*:|^[ \t]*Art\s*\.?\s*1)",
+    re.IGNORECASE | re.MULTILINE,
 )
 AUTOR = re.compile(r"^\s*Autor\s*:\s*(.{3,80})$", re.MULTILINE | re.IGNORECASE)
 

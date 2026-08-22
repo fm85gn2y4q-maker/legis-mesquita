@@ -33,13 +33,13 @@ inconstitucionalidade estão fora do alcance de qualquer base montada assim.
 
 | | |
 |---|---|
-| Atos | **4.134** — 2001 a 2026 |
-| Com texto integral pesquisável | 4.076 (98,6%) |
+| Atos | **4.143** — 2001 a 2026 |
+| Com texto integral pesquisável | 4.085 (98,6%) |
 | Sem texto | 58 — constam com ementa; veja `listar_atos_sem_texto` |
-| Páginas indexadas | 10.514 |
+| Páginas indexadas | 10.531 |
 | Caracteres | 20,3 milhões |
-| Referências entre atos resolvidas | 712 |
-| Atos com revogação integral expressa | 83 |
+| Referências entre atos resolvidas | 720 |
+| Atos com revogação integral expressa | 84 |
 | Atos com revogação parcial expressa | 16 |
 
 O acervo se mantém em dia pelo Diário Oficial: `python -m legis.ingestao` lê,
@@ -81,7 +81,7 @@ Get-ScheduledTask -TaskName "Legislacao Mesquita - atualizacao semanal"
 Para comparar dois acervos quaisquer, fora da rotina:
 
 ```bash
-python -m legis.comparar acervo/legislacao-mesquita-v1.3.0.db.gz dados/mesquita.sqlite
+python -m legis.comparar acervo/legislacao-mesquita-v1.4.0.db.gz dados/mesquita.sqlite
 ```
 
 Construído a partir de 7.763 PDFs (3.964 distintos por hash), 3,6 GB.
@@ -158,14 +158,14 @@ python -m legis.publicar
 ```
 
 Hospedagem permanente: o `Dockerfile` e o `render.yaml` estão prontos, e o
-acervo comprimido viaja no repositório (`acervo/`, 21,0 MB). A imagem o
+acervo comprimido viaja no repositório (`acervo/`, 21,1 MB). A imagem o
 descomprime conferindo o sha256 declarado — divergindo, a construção falha em
 vez de subir acervo diferente do testado.
 
 Para gerar a versão comprimida de um acervo recém-coletado:
 
 ```bash
-python preparar_release.py 1.1.0
+python preparar_release.py 1.5.0
 ```
 
 O comando imprime o sha256 para as duas linhas `ARG` do `Dockerfile`. Depois do

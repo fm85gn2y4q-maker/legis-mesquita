@@ -249,6 +249,38 @@ def test_ementa_para_no_inicio_do_ato():
     assert "Art. 1" not in ementa
 
 
+def test_ementa_que_cita_artigo_nao_e_truncada():
+    """Caso real: a Lei 1.291/2026, que altera a lei das Organizações Sociais.
+
+    O marcador `Art. 1` encerra a ementa quando ABRE o corpo do ato. Valendo em
+    qualquer posição, ele cortava a ementa que apenas CITA um artigo — e some o
+    objeto da norma: sobrava "Altera o caput e insere incisos no".
+    """
+    corpo = (
+        "\nAutor: Poder Executivo\n"
+        "Altera o caput e insere incisos no art. 1º da Lei Municipal nº 1.275,\n"
+        "de 28 de outubro de 2025, para ampliar o rol de áreas de atuação\n"
+        "passíveis de execução por Organizações Sociais no Município.\n"
+        "O PREFEITO DO MUNICÍPIO DE MESQUITA, faço saber que a Câmara aprova\n"
+        "Art. 1º - O art. 1º da Lei nº 1.275/2025 passa a vigorar assim:\n"
+    )
+    ementa = extrair_ementa(corpo)
+    assert "Organizações Sociais" in ementa
+    assert ementa.startswith("Altera o caput")
+    assert "passa a vigorar" not in ementa
+
+
+def test_ementa_termina_no_artigo_que_abre_o_ato():
+    """Sem fórmula de promulgação, o primeiro artigo ainda encerra a ementa."""
+    corpo = (
+        "\nDispõe sobre a coleta seletiva no Município.\n"
+        "Art. 1º - Fica instituída a coleta seletiva.\n"
+        "Art. 2º - Esta Lei entra em vigor na data de sua publicação.\n"
+    )
+    ementa = extrair_ementa(corpo)
+    assert ementa == "Dispõe sobre a coleta seletiva no Município"
+
+
 def test_ementa_do_modelo_antigo_ignora_o_bloco_de_publicacao():
     corpo = (
         "\nPUBLICADO\nJornal: D.O.\nData: 07/05/01\nPágina: 02\n"
