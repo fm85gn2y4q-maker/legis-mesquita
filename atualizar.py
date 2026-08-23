@@ -29,10 +29,14 @@ import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+from legis import fontes
+
 RAIZ = Path(__file__).resolve().parent
 PYTHON = sys.executable
-DIARIOS = Path(os.path.expanduser("~/Mesquita_Diarios_Oficiais"))
-LEGISLACAO = Path(os.path.expanduser("~/Mesquita_Legislacao"))
+# As fontes moraram em `~` até 23/08/2026; hoje ficam no HD externo, e o
+# caminho se resolve em `legis/fontes.py` porque letra de USB muda.
+DIARIOS = fontes.diarios()
+LEGISLACAO = fontes.legislacao()
 STAGING = RAIZ / "dados" / "staging.sqlite"
 TRAVA = RAIZ / "dados" / ".atualizando"
 
@@ -121,8 +125,14 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _executar(argumentos) -> int:
+    queixa = fontes.conferir(LEGISLACAO, DIARIOS)
+    if queixa:
+        print(queixa, file=sys.stderr)
+        return 2
+
     atual = publicado()
     desde = argumentos.desde or corte(atual)
+    print(f"fontes em: {fontes.raiz_das_fontes()}")
     print(f"acervo publicado: {atual.name}")
     print(f"relendo o Diário a partir de {desde} "
           f"(margem de {MARGEM_DE_DIAS} dias)")

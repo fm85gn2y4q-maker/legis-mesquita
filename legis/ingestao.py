@@ -1237,12 +1237,14 @@ if __name__ == "__main__":
     import argparse
 
     analisador = argparse.ArgumentParser(prog="python -m legis.ingestao")
-    analisador.add_argument("--pasta", default=os.path.expanduser("~/Mesquita_Legislacao"))
+    from legis import fontes
+
+    analisador.add_argument("--pasta", default=str(fontes.legislacao()))
     analisador.add_argument("--banco", default=str(Path(__file__).parent.parent / "dados" / "mesquita.sqlite"))
     analisador.add_argument("--limite", type=int, default=None,
                             help="processa só os N primeiros PDFs (calibração)")
     analisador.add_argument(
-        "--diarios", default=os.path.expanduser("~/Mesquita_Diarios_Oficiais/municipio"),
+        "--diarios", default=str(fontes.diarios() / "municipio"),
         help="acervo do Diário Oficial, usado para manter o acervo em dia")
     analisador.add_argument(
         "--desde", default="2026-07-21", metavar="AAAA-MM-DD",
