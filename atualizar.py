@@ -119,8 +119,13 @@ def main(argv: list[str] | None = None) -> int:
     # arquivo vazio — foi o que aconteceu em 22/08/2026, e o acervo publicado
     # chegou a ser gerado com zero ato.
     from legis.trava import exclusiva
+    from legis.vigilia import acordado
 
-    with exclusiva(TRAVA, quem=f"atualizar.py em {date.today():%d/%m %H:%M}"):
+    # A tarefa agendada acorda a máquina para começar e não a mantém acordada.
+    # Três execuções agendadas morreram no meio por isso — inclusive a de
+    # 22/08, que apagou o staging para recriá-lo e não voltou.
+    with (acordado("reprocessamento do acervo"),
+          exclusiva(TRAVA, quem=f"atualizar.py em {date.today():%d/%m %H:%M}")):
         return _executar(argumentos)
 
 
