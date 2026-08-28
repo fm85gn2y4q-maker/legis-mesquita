@@ -33,12 +33,12 @@ inconstitucionalidade estão fora do alcance de qualquer base montada assim.
 
 | | |
 |---|---|
-| Atos | **4.143** — 2001 a 2026 |
-| Com texto integral pesquisável | 4.085 (98,6%) |
+| Atos | **4.148** — 2001 a 2026 |
+| Com texto integral pesquisável | 4.090 (98,6%) |
 | Sem texto | 58 — constam com ementa; veja `listar_atos_sem_texto` |
-| Páginas indexadas | 10.536 |
+| Páginas indexadas | 10.546 |
 | Caracteres | 20,3 milhões |
-| Referências entre atos resolvidas | 729 |
+| Referências entre atos resolvidas | 734 |
 | Atos com revogação integral expressa | 81 |
 | Atos com revogação parcial expressa | 18 |
 
@@ -48,7 +48,7 @@ Duas medidas dizem o tamanho do que falta, e não se confundem:
 |---|---|
 | Catalogados pelo portal | 4.074 |
 | Desses, ausentes do acervo | **0** |
-| Achados só no Diário Oficial, fora do catálogo | 69 |
+| Achados só no Diário Oficial, fora do catálogo | 74 |
 | Números que faltam na série de Leis | 97 (de 1 a 1.291) |
 | Números que faltam na série de Decretos | **1.089** (de 1 a 3.930) |
 
@@ -102,7 +102,7 @@ Get-ScheduledTask -TaskName "Legislacao Mesquita - atualizacao semanal"
 Para comparar dois acervos quaisquer, fora da rotina:
 
 ```bash
-python -m legis.comparar acervo/legislacao-mesquita-v1.6.0.db.gz dados/mesquita.sqlite
+python -m legis.comparar acervo/legislacao-mesquita-v1.7.0.db.gz dados/mesquita.sqlite
 ```
 
 Construído a partir de 7.763 PDFs (3.964 distintos por hash), 3,6 GB.
@@ -186,7 +186,7 @@ vez de subir acervo diferente do testado.
 Para gerar a versão comprimida de um acervo recém-coletado:
 
 ```bash
-python preparar_release.py 1.7.0
+python preparar_release.py 1.8.0
 ```
 
 O comando imprime o sha256 para as duas linhas `ARG` do `Dockerfile`. Depois do

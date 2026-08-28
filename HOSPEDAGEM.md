@@ -48,9 +48,9 @@ winget install --id Cloudflare.cloudflared
 
 | | |
 |---|---|
-| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.6.0` |
-| Acervo | `acervo/legislacao-mesquita-v1.6.0.db.gz` — **21,1 MB**, versionado no repositório |
-| sha256 | `e93004b5664809b9d3f6099836a93806a076cb373d458871094e23bc3d14987c` |
+| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.7.0` |
+| Acervo | `acervo/legislacao-mesquita-v1.7.0.db.gz` — **21,1 MB**, versionado no repositório |
+| sha256 | `45e805d042d6ae0c8e0c84dd6081f4935245da07458ecef913dafb28e8d35f43` |
 | `Dockerfile` | descomprime o acervo do repositório, conferindo o hash |
 | `render.yaml` | pronto, sem `healthCheckPath` (veja o porquê no próprio arquivo) |
 
@@ -58,7 +58,7 @@ winget install --id Cloudflare.cloudflared
 e confere o sha256 antes de usar. A decisão anterior era outra — asset de
 release — e a troca está registrada no `METODO.md`.
 
-O passo do build foi verificado fora do Docker: reproduz 4.143 atos, 10.536
+O passo do build foi verificado fora do Docker: reproduz 4.148 atos, 10.546
 páginas, 81 revogações integrais e 18 parciais, com `integrity_check` intacto —
 e para a construção quando o hash não bate.
 
@@ -159,9 +159,9 @@ A resposta tem de bater com a versão publicada:
 
 | | |
 |---|---|
-| Atos | **4.143** |
-| Com texto integral | 4.085 |
-| Páginas indexadas | 10.536 |
+| Atos | **4.148** |
+| Com texto integral | 4.090 |
+| Páginas indexadas | 10.546 |
 | Revogações **integrais** | **81** |
 | Revogações **parciais** | **18** |
 
@@ -180,10 +180,10 @@ copy dados\staging.sqlite dados\mesquita.sqlite
 ```
 
 ```bash
-python preparar_release.py 1.7.0
+python preparar_release.py 1.8.0
 ```
 
-Gera `dist/legislacao-mesquita-v1.7.0.db.gz` e imprime o sha256. Então:
+Gera `dist/legislacao-mesquita-v1.8.0.db.gz` e imprime o sha256. Então:
 
 1. mova o `.gz` para `acervo/`. **Apague o anterior só depois que o novo tiver
    passado** — senão cada versão fica somando ~23 MB à imagem, mas apagar antes
