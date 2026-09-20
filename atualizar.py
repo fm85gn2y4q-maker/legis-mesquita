@@ -137,7 +137,7 @@ def _executar(argumentos) -> int:
 
     atual = publicado()
     desde = argumentos.desde or corte(atual)
-    print(f"fontes em: {fontes.raiz_das_fontes()}")
+    print(f"fontes: {fontes.onde_estao()}")
     print(f"acervo publicado: {atual.name}")
     print(f"relendo o Diário a partir de {desde} "
           f"(margem de {MARGEM_DE_DIAS} dias)")

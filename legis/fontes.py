@@ -1,17 +1,27 @@
 """Onde moram os PDFs que alimentam o acervo.
 
-Eram duas pastas em `~`. Em 23/08/2026 foram para o HD externo — 7,6 GB que não
-precisam ocupar o disco do sistema, e que já ficam ao lado dos outros acervos.
+Duas pastas, e **não se procura uma raiz comum para as duas**. Essa era a
+suposição da primeira versão, e ela quebrou em 20/09/2026: a migração levou os
+PDFs por ato para `D:\\Acervos\\Mesquita_Legislacao` e deixou o acervo do Diário
+alcançável por `~/Mesquita_Diarios_Oficiais`, que é uma junção para dentro do
+projeto `diarios-mesquita` — e lá dentro `municipio` é **outro** link, este sim
+para `D:\\Acervos`. Três saltos, duas unidades, nenhuma raiz em comum.
 
-O caminho deixou de ser constante por um motivo prático: letra de unidade USB
-muda. `LEGIS_FONTES` manda; sem ela, procura-se nos lugares conhecidos, e a
-escolha é **impressa** por quem chama. Rotina que lê a pasta errada em silêncio
-é o defeito mais caro deste projeto — já custou 13 minutos de reprocessamento
-sobre um dicionário vazio, e a única pista foi a contagem de arquivos idêntica.
+Cada pasta se resolve por conta própria, na ordem declarada abaixo, e quem
+chama **imprime** o que foi escolhido. Rotina que lê a pasta errada em silêncio
+é o defeito mais caro deste projeto: já custou 13 minutos de reprocessamento
+sobre um dicionário vazio, e a única pista foi a contagem de arquivos ter dado
+idêntica.
 
-Não há palpite entre unidades: exige-se que a pasta exista. Com o HD desligado,
-a rotina falha dizendo o que procurou, em vez de reconstruir o acervo a partir
-do nada — que passaria pela ingestão e só seria pego no diff.
+Não há palpite: exige-se que a pasta exista. Faltando, a rotina para dizendo o
+que procurou, em vez de reconstruir o acervo a partir do nada — que passaria
+pela ingestão inteira e só seria pego lá na frente, pelo diff.
+
+Sobre junções penduradas, que é como este arquivo foi parar aqui: `~` guarda
+uma junção `Mesquita_Legislacao` cujo alvo não existe mais, sobra de uma pasta
+apagada sem que se olhasse quem apontava para dentro dela. `is_dir()` devolve
+False para ela, então a busca segue para a candidata seguinte — que é o
+comportamento certo, mas só porque a ordem põe `D:/Acervos` na frente de `~`.
 """
 
 from __future__ import annotations
@@ -22,48 +32,53 @@ from pathlib import Path
 LEGISLACAO = "Mesquita_Legislacao"
 DIARIOS = "Mesquita_Diarios_Oficiais"
 
-# Na ordem em que se procura.
+# Na ordem em que se procura, por pasta.
 #
-# A ordem natural seria o HD externo primeiro — depois da mudança é lá que o
-# acervo mora, e uma sobra em `~` seria cópia velha. **Está invertida de
-# propósito desde 23/08/2026.**
+# `D:/Acervos` vem primeiro porque é para onde a migração levou tudo, e porque
+# uma sobra em `~` seria cópia velha — achá-la antes seria reprocessar o
+# passado sem avisar.
 #
-# A mudança para o HD foi tentada nesse dia e reprovou na conferência. Medido
-# no mesmo PDF: `C:` lê a 161 MB/s, `D:` a 0,4 MB/s — quatrocentas vezes mais
-# lento. O `quick_check` do banco do Diário copiado para lá levou 873 segundos
-# e terminou em `Tree 5 page 14956: unable to get the page. error code=266`,
-# com falhas de gravação atrasada no log do Windows. O mesmo banco em `C:`
-# passa em 2 segundos.
-#
-# Enquanto for assim, preferir `D:` seria mandar a rotina de sábado ler 3,6 GB
-# de PDFs de um disco que não devolve o que gravou. Trocar de cabo, de porta ou
-# de gaveta é o primeiro passo; resolvido isso e reconferido, inverta esta
-# tupla de volta.
-CANDIDATAS = ("~", "D:/")
+# O HD externo chegou a reprovar em 23/08/2026: lia a 0,4 MB/s contra 161 do
+# `C:`, corrompeu o banco copiado e encheu o log do Windows com 13.773 avisos
+# em seis horas. Remedido em 20/09, depois da troca: **53,6 MB/s** e 290
+# eventos em 24 horas. Voltou a servir.
+CANDIDATAS_LEGISLACAO = ("D:/Acervos", "~", "D:/")
+
+# O do Diário fica em `~` de propósito: é lá que estão `baixar_diarios.py` e o
+# banco que o coletor usa. Os PDFs em si moram no `D:`, alcançados pelo link
+# `municipio` de dentro dessa pasta — quem lê não precisa saber disso.
+CANDIDATAS_DIARIOS = ("~", "D:/Acervos", "D:/")
 
 
-def raiz_das_fontes(explicita: str | None = None) -> Path:
-    """A pasta que contém `Mesquita_Legislacao` e `Mesquita_Diarios_Oficiais`."""
+def _resolver(nome: str, candidatas: tuple[str, ...],
+              explicita: str | None) -> Path:
     escolhida = explicita or os.environ.get("LEGIS_FONTES")
     if escolhida:
-        return Path(os.path.expanduser(escolhida))
+        return Path(os.path.expanduser(escolhida)) / nome
 
-    for candidata in CANDIDATAS:
-        raiz = Path(os.path.expanduser(candidata))
-        if (raiz / LEGISLACAO).is_dir() or (raiz / DIARIOS).is_dir():
-            return raiz
+    for candidata in candidatas:
+        caminho = Path(os.path.expanduser(candidata)) / nome
+        # `is_dir()` é False para junção pendurada, e é o que queremos: a busca
+        # segue em frente em vez de devolver um caminho que não abre.
+        if caminho.is_dir():
+            return caminho
 
-    # Nenhuma existe: devolve a primeira mesmo assim, para que a mensagem de
-    # erro de quem chamou mostre um caminho concreto em vez de `None`.
-    return Path(os.path.expanduser(CANDIDATAS[0]))
+    # Nenhuma existe: devolve a primeira para que a queixa cite um caminho
+    # concreto em vez de `None`.
+    return Path(os.path.expanduser(candidatas[0])) / nome
 
 
 def legislacao(explicita: str | None = None) -> Path:
-    return raiz_das_fontes(explicita) / LEGISLACAO
+    return _resolver(LEGISLACAO, CANDIDATAS_LEGISLACAO, explicita)
 
 
 def diarios(explicita: str | None = None) -> Path:
-    return raiz_das_fontes(explicita) / DIARIOS
+    return _resolver(DIARIOS, CANDIDATAS_DIARIOS, explicita)
+
+
+def onde_estao(explicita: str | None = None) -> str:
+    """Uma linha para a rotina imprimir antes de começar."""
+    return f"legislação em {legislacao(explicita)} · Diário em {diarios(explicita)}"
 
 
 def conferir(*pastas: Path) -> str | None:
@@ -78,7 +93,8 @@ def conferir(*pastas: Path) -> str | None:
     return (
         "Não encontrei as fontes:\n  "
         + "\n  ".join(str(p) for p in faltando)
-        + "\n\nO acervo de PDFs está no HD externo. Conecte-o, ou aponte o "
-        "caminho:\n  set LEGIS_FONTES=E:\\   (ou o caminho onde as pastas "
-        "estiverem)"
+        + "\n\nOs PDFs estão no HD externo, em D:\\Acervos. Conecte-o, ou "
+        "aponte a raiz:\n  set LEGIS_FONTES=E:\\Acervos   (ou onde as pastas "
+        "estiverem)\n\nSe o caminho existe mas não abre, pode ser junção "
+        "pendurada — o alvo dela foi apagado."
     )
