@@ -20,6 +20,15 @@ import pytest
 RAIZ = Path(__file__).resolve().parent.parent
 DOCKERFILE = RAIZ / "Dockerfile"
 
+# `acervo/` é junção para o HD externo desde que a rotina de arquivamento da
+# máquina passou a movê-lo. Com o disco desligado, o nome existe e não abre —
+# e estes testes reprovavam com mensagem obscura, deixando a suíte vermelha por
+# causa do ambiente. Suíte vermelha por motivo conhecido esconde a regressão
+# que a gente precisa ver.
+pytestmark = pytest.mark.skipif(
+    not (RAIZ / "acervo").is_dir(),
+    reason="acervo/ não abre — HD externo desconectado")
+
 # Sem isto o subprocesso escreve em cp1252 no Windows e "Conferência" chega
 # aqui com o "ê" trocado por caractere de substituição — o teste reprovava
 # uma verificação que tinha funcionado.

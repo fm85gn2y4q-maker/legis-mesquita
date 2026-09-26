@@ -99,6 +99,46 @@ def corte(acervo: Path) -> str:
     return quando.isoformat()
 
 
+def area_de_trabalho_utilizavel() -> str | None:
+    """Queixa se as pastas do próprio projeto não abrirem; `None` se abrirem.
+
+    `dados/`, `acervo/` e `dist/` deixaram de ser pastas reais: a rotina de
+    arquivamento da máquina as move para o HD externo e deixa junções no lugar.
+    Com o disco desconectado, a junção continua existindo e **não abre**.
+
+    O sintoma é contraditório e por isso confunde: o `git status` diz que
+    `dados/` não existe, e o `os.mkdir` diz que já existe. Os dois estão certos
+    — o nome está ocupado por um reparse point cujo alvo sumiu. `exist_ok=True`
+    não salva, porque ele só perdoa quando o que está lá é diretório.
+
+    Em 26/09/2026 isso derrubou a rotina com um traceback de `FileExistsError`
+    dentro de `legis/trava.py`, três quadros abaixo do que importava. Esta
+    conferência vem ANTES de tomar a trava, justamente porque foi a trava que
+    estourou.
+    """
+    quebradas = [p for p in (RAIZ / "dados", RAIZ / "acervo", RAIZ / "dist")
+                 if p.exists() is False and _ocupado(p)]
+    if not quebradas:
+        return None
+    return (
+        "Estas pastas do projeto existem mas não abrem:\n  "
+        + "\n  ".join(str(p) for p in quebradas)
+        + "\n\nSão junções para o HD externo, e ele não está conectado — "
+        "`dados/`, `acervo/` e `dist/` foram movidos para lá pela rotina de "
+        "arquivamento.\n\nConecte o disco e rode de novo. O acervo publicado "
+        "não se perdeu: ele está versionado no Git."
+    )
+
+
+def _ocupado(p: Path) -> bool:
+    """O nome está tomado, ainda que não abra? É a assinatura da junção morta."""
+    try:
+        p.lstat()          # lstat NÃO segue o link: enxerga a junção em si
+        return True
+    except OSError:
+        return False
+
+
 def rodar(comando: list[str], onde: Path) -> int:
     print(f"\n$ {' '.join(str(x) for x in comando)}", flush=True)
     return subprocess.run(comando, cwd=onde).returncode
@@ -113,6 +153,13 @@ def main(argv: list[str] | None = None) -> int:
     argumentos = analisador.parse_args(argv)
 
     sys.path.insert(0, str(RAIZ))
+
+    # ANTES da trava: foi ela que estourou em 26/09/2026, ao tentar criar
+    # `dados/` sobre uma junção pendurada para o HD desconectado.
+    queixa = area_de_trabalho_utilizavel()
+    if queixa:
+        print(queixa, file=sys.stderr)
+        return 2
 
     # A rotina agendada e a mão do usuário escrevem no mesmo staging, e
     # `construir` abre apagando o banco. Sem trava, quem chega no meio copia um

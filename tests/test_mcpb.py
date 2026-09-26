@@ -26,8 +26,15 @@ CONSTRUCAO = Path(__file__).resolve().parent.parent / "build" / "mcpb"
 ENTRADA = CONSTRUCAO / "server" / "main.py"
 MANIFESTO = CONSTRUCAO / "manifest.json"
 
-pytestmark = pytest.mark.skipif(not ENTRADA.exists(),
-                                reason="pacote não construído")
+# O pacote embute o acervo, e `dados/` é junção para o HD externo: sem o disco,
+# `construir()` levanta FileNotFoundError ao abrir o banco. É ambiente, não
+# defeito — e reprovar por isso deixa a suíte vermelha sem informar nada.
+RAIZ_PROJ = Path(__file__).resolve().parent.parent
+pytestmark = [
+    pytest.mark.skipif(not ENTRADA.exists(), reason="pacote não construído"),
+    pytest.mark.skipif(not (RAIZ_PROJ / "dados").is_dir(),
+                       reason="dados/ não abre — HD externo desconectado"),
+]
 
 
 def test_manifesto_declara_as_ferramentas_que_existem():
