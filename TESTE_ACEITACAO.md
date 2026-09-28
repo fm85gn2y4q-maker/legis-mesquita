@@ -26,13 +26,13 @@ revogações **parciais** separado do de integrais — campo que só existe nest
 versão. Não vindo, remova e recrie o conector (ou reinstale a extensão) antes
 de rodar qualquer coisa.
 
-Os números da versão `v1.9.0`, conferidos contra o artefato publicado:
+Os números da versão `v1.10.0`, conferidos contra o artefato publicado:
 
 | | |
 |---|---|
-| Atos | **4.155** |
-| Com texto integral | 4.097 |
-| Páginas indexadas | 10.558 |
+| Atos | **4.157** |
+| Com texto integral | 4.099 |
+| Páginas indexadas | 10.561 |
 | Atos com revogação **integral** | **81** |
 | Atos com revogação **parcial** | **18** |
 

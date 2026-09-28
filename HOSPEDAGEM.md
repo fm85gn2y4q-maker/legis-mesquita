@@ -48,9 +48,9 @@ winget install --id Cloudflare.cloudflared
 
 | | |
 |---|---|
-| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.9.0` |
-| Acervo | `acervo/legislacao-mesquita-v1.9.0.db.gz` — **21,1 MB**, versionado no repositório |
-| sha256 | `cbc3c179571d18ce3908f5b70aa96417e4af40a0a4b4af4d166217d39b0225ec` |
+| Código no GitHub | `fm85gn2y4q-maker/legis-mesquita`, branch `main`, tag `v1.10.0` |
+| Acervo | `acervo/legislacao-mesquita-v1.10.0.db.gz` — **21,1 MB**, versionado no repositório |
+| sha256 | `9b6070e43ff50885ce24880af06db6a9f70e8bbdd5ae91ee6ff7745dd8d9c8f7` |
 | `Dockerfile` | descomprime o acervo do repositório, conferindo o hash |
 | `render.yaml` | pronto, sem `healthCheckPath` (veja o porquê no próprio arquivo) |
 
@@ -58,7 +58,7 @@ winget install --id Cloudflare.cloudflared
 e confere o sha256 antes de usar. A decisão anterior era outra — asset de
 release — e a troca está registrada no `METODO.md`.
 
-O passo do build foi verificado fora do Docker: reproduz 4.155 atos, 10.558
+O passo do build foi verificado fora do Docker: reproduz 4.157 atos, 10.561
 páginas, 81 revogações integrais e 18 parciais, com `integrity_check` intacto —
 e para a construção quando o hash não bate.
 
@@ -159,9 +159,9 @@ A resposta tem de bater com a versão publicada:
 
 | | |
 |---|---|
-| Atos | **4.155** |
-| Com texto integral | 4.097 |
-| Páginas indexadas | 10.558 |
+| Atos | **4.157** |
+| Com texto integral | 4.099 |
+| Páginas indexadas | 10.561 |
 | Revogações **integrais** | **81** |
 | Revogações **parciais** | **18** |
 
@@ -180,10 +180,10 @@ copy dados\staging.sqlite dados\mesquita.sqlite
 ```
 
 ```bash
-python preparar_release.py 1.10.0
+python preparar_release.py 1.11.0
 ```
 
-Gera `dist/legislacao-mesquita-v1.10.0.db.gz` e imprime o sha256. Então:
+Gera `dist/legislacao-mesquita-v1.11.0.db.gz` e imprime o sha256. Então:
 
 1. mova o `.gz` para `acervo/`. **Apague o anterior só depois que o novo tiver
    passado** — senão cada versão fica somando ~23 MB à imagem, mas apagar antes
