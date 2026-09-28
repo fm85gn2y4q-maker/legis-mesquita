@@ -66,3 +66,35 @@ async def test_pacote_sobe_com_o_python_do_PATH():
             assert init.serverInfo.name == "legislacao-mesquita"
             r = await s.call_tool("cobertura_do_acervo", {})
             assert json.loads(r.content[0].text)["total_de_atos"] > 1_000
+
+
+def test_versao_do_pacote_e_a_do_acervo():
+    """Pacote que se anuncia sempre 1.0.0 é atualização que não se vê chegar.
+
+    O Claude Desktop decide por este número se o arquivo arrastado substitui o
+    instalado. Ficou fixo em `1.0.0` do primeiro commit até a v1.10.0: onze
+    acervos distintos com a mesma versão declarada, e nenhum jeito de o usuário
+    saber qual estava rodando.
+    """
+    import re
+
+    import empacotar_mcpb
+
+    manifesto = json.loads(MANIFESTO.read_text(encoding="utf-8"))
+    assert manifesto["version"] == empacotar_mcpb.versao_do_acervo()
+    assert manifesto["version"] != "1.0.0", "é o valor do defeito"
+    assert re.fullmatch(r"\d+\.\d+\.\d+", manifesto["version"])
+
+
+def test_versao_declarada_e_a_mesma_que_o_Dockerfile_publica():
+    """Extensão e serviço servem o mesmo acervo; versão divergente mente.
+
+    O usuário consulta os dois — o conector HTTP e a extensão local — e compara
+    respostas. Se cada um declarar uma versão, a divergência de conteúdo fica
+    impossível de atribuir.
+    """
+    import empacotar_mcpb
+
+    dockerfile = (RAIZ_PROJ / "Dockerfile").read_text(encoding="utf-8")
+    versao = empacotar_mcpb.versao_do_acervo()
+    assert f"legislacao-mesquita-v{versao}.db.gz" in dockerfile

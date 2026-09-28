@@ -147,6 +147,40 @@ disso acorda a máquina e pode levar cerca de um minuto — tempo suficiente par
 o conector dar erro de tempo esgotado *na primeira tentativa*. Insista uma vez
 antes de concluir que a instalação falhou.
 
+### 3.6. O teto de horas do plano gratuito, e o 503 que não é defeito
+
+O plano gratuito dá **750 horas de instância por mês, para a conta inteira** —
+não por serviço. Quando esgota, o Render **suspende todos** os serviços
+gratuitos da conta de uma vez, e cada um passa a responder:
+
+    HTTP 503 — "This service has been suspended."
+
+Aconteceu em 27/09/2026 às 13h34, com 23 serviços na conta e 748,93 das 750
+horas consumidas. Os quatro sintomas, todos enganosos:
+
+- **503 em tudo**, inclusive em `/`, que não depende de acervo nem de OAuth.
+- **Não é o seu serviço**: os outros da conta caem juntos. Testar um vizinho é
+  o diagnóstico mais rápido que existe aqui.
+- **O commit novo não aparece na lista de deploys.** O Render não constrói
+  serviço suspenso, então o push de 21h05 daquele dia simplesmente não gerou
+  deploy — e a página segue exibindo o commit anterior como "último
+  implantado", o que parece build falho e não é.
+- **Não há nada nos logs.** A causa aparece só em *Events*, como
+  "Suspended by Free Tier Usage Exceeded", e em *Billing* → Free Instance Hours.
+
+Antes de procurar defeito no código, portanto: `curl` num serviço vizinho. Se
+ele também der 503 com "suspended", o problema é cota, e nenhuma correção de
+código muda isso.
+
+O teto zera no início do ciclo de cobrança, e os serviços voltam sozinhos. O
+commit que não foi implantado **não volta sozinho**: quando o serviço reabrir,
+dispare *Manual Deploy* ou empurre um commit novo.
+
+Três coisas reduzem o consumo, em ordem de esforço: apagar serviço duplicado
+(havia três terminados em `-kip3`), deixar hibernar o que não é consultado, e
+pagar instância para o que precisa estar de pé — instância paga não desconta do
+teto gratuito.
+
 ---
 
 ## Confirmar que subiu o acervo certo

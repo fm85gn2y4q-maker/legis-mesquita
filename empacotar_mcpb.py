@@ -27,6 +27,29 @@ CONSTRUCAO = RAIZ / "build" / "mcpb"
 DESTINO = RAIZ / "dist" / "legislacao-mesquita.mcpb"
 BANCO = RAIZ / "dados" / "mesquita.sqlite"
 
+
+def versao_do_acervo() -> str:
+    """A versão do pacote é a do acervo que ele carrega.
+
+    Ficou em `1.0.0` do primeiro commit até a v1.10.0, e isso não é detalhe de
+    metadado: o Claude Desktop decide por este número se o arquivo arrastado é
+    uma atualização. Onze acervos diferentes se anunciaram como a mesma versão,
+    e o usuário não tinha como saber qual estava instalado.
+
+    A fonte é o nome do artefato em `acervo/`, o mesmo que o Dockerfile fixa na
+    linha `ARG ACERVO`. Assim a extensão e o serviço não podem divergir de
+    versão sem que alguém troque o arquivo.
+    """
+    import re
+
+    candidatos = sorted((RAIZ / "acervo").glob("legislacao-mesquita-v*.db.gz"))
+    if not candidatos:
+        raise SystemExit("Nenhum acervo em acervo/. Não há versão a declarar.")
+    achado = re.search(r"-v(\d+\.\d+\.\d+)\.db\.gz$", candidatos[-1].name)
+    if not achado:
+        raise SystemExit(f"Nome sem versão legível: {candidatos[-1].name}")
+    return achado.group(1)
+
 # Versões de Python para as quais as dependências são empacotadas. O Claude
 # Desktop não usa o interpretador do projeto: pega o primeiro `python` do PATH
 # dele. Como `pydantic_core` é binário compilado, um .pyd de cp312 não carrega
@@ -84,7 +107,9 @@ MANIFESTO = {
     "manifest_version": "0.2",
     "name": "legislacao-mesquita",
     "display_name": "Legislação de Mesquita",
-    "version": "1.0.0",
+    # Trocada em `empacotar()` pela versão do acervo. O valor aqui só existe
+    # para o manifesto ser válido se alguém inspecionar o dicionário.
+    "version": "0.0.0",
     "description": "Leis e decretos do Município de Mesquita/RJ, com verificação "
                    "de revogação.",
     "long_description": (
@@ -303,6 +328,8 @@ def empacotar(python: str | None = None) -> int:
     (CONSTRUCAO / "dados").mkdir()
     shutil.copy2(BANCO, CONSTRUCAO / "dados" / "mesquita.sqlite")
 
+    MANIFESTO["version"] = versao_do_acervo()
+    print(f"  versão do pacote: {MANIFESTO['version']} (a do acervo)")
     (CONSTRUCAO / "manifest.json").write_text(
         json.dumps(MANIFESTO, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
